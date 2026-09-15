@@ -87,33 +87,60 @@ def _hold_out_and_bad_hosts() -> tuple[frozenset[str], frozenset[str]]:
     return EXCLUDED_HOLD_OUT_TARGETS, KNOWN_BAD_HOSTS
 
 
+def _parse_target_file(path: Path) -> list[str]:
+    """Parse a plain-text target list: one id per line, ``#``-comments stripped.
+
+    Shared by ``config/watchlist.txt`` and the optional catalogue-generated
+    ``config/target_list_<mission>.txt`` files -- both use the same
+    convention (``scripts/build_target_list.py``'s output lines look like
+    ``TIC 12377940  # role=disc pair=hr-9102 ...``, which this strips down to
+    just ``TIC 12377940``).
+    """
+    if not path.exists():
+        return []
+    lines = [line.split("#", 1)[0].strip() for line in path.read_text(encoding="utf-8").splitlines()]
+    return [line for line in lines if line]
+
+
 def get_target_list(mission: str) -> list[str]:
     """The full target list for one mission, with the hold-out guard re-enforced here too.
 
     Kepler comes from ``build_kepler_host_list.KEPLER_HOST_STARS`` (a tuple
     constant that already excludes the hold-out and known-bad sets via its own
-    module-level asserts); TESS comes from ``config/watchlist.txt`` (plain
-    text, one target per line, ``#`` comments). Both sources are re-checked
-    against the hold-out/known-bad sets here as well -- defense in depth, so a
-    future third target source cannot silently leak a validation star into
-    generated data without a loud failure.
+    module-level asserts); TESS comes from ``config/watchlist.txt``. Both are
+    the original, hand-picked 33-target seed lists.
+
+    **Additive, optional catalogue expansion**: if
+    ``config/target_list_<mission>.txt`` exists (written by
+    ``scripts/build_target_list.py``), its targets are appended after the
+    seed list, deduplicated. Nothing breaks if the file doesn't exist yet --
+    ``get_target_list`` returns exactly the original 33 in that case, same as
+    before this was wired in. This is deliberately additive rather than a
+    replacement, so the original, already-proven seed lists keep working
+    regardless of what the catalogue script produces.
+
+    Both sources are re-checked against the hold-out/known-bad sets here as
+    well -- defense in depth, so a future third target source cannot silently
+    leak a validation star into generated data without a loud failure.
     """
     hold_out, known_bad = _hold_out_and_bad_hosts()
+    repo_root = Path(__file__).resolve().parent.parent
 
     if mission == "Kepler":
         from build_kepler_host_list import KEPLER_HOST_STARS
 
         targets = list(KEPLER_HOST_STARS)
     elif mission == "TESS":
-        repo_root = Path(__file__).resolve().parent.parent
-        watchlist = repo_root / "config" / "watchlist.txt"
-        targets = [
-            line.split("#", 1)[0].strip()
-            for line in watchlist.read_text(encoding="utf-8").splitlines()
-        ]
-        targets = [t for t in targets if t]
+        targets = _parse_target_file(repo_root / "config" / "watchlist.txt")
     else:
         raise ValueError(f"unknown mission {mission!r}, expected one of {MISSIONS}")
+
+    catalogue_file = repo_root / "config" / f"target_list_{mission.lower()}.txt"
+    seen = set(targets)
+    for extra in _parse_target_file(catalogue_file):
+        if extra not in seen:
+            targets.append(extra)
+            seen.add(extra)
 
     leaked = (set(targets) & hold_out) | (set(targets) & known_bad)
     if leaked:

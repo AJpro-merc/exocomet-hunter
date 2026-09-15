@@ -534,14 +534,31 @@ def _parse_tic_table(table: Any) -> list[TicMatch]:
     return matches
 
 
-def _query_tic_region(ra_deg: float, dec_deg: float, radius_deg: float) -> list[TicMatch]:
+#: Cap on rows returned by one TIC cone search. Found necessary 2026-09-15: a
+#: wide-radius control-star search (see ``CONTROL_SEARCH_RADIUS_LADDER_DEG``)
+#: with no ``pagesize`` stalled indefinitely at 8-15 degree radii -- the TIC
+#: has on the order of a billion rows, and an unbounded cone that size can
+#: return an enormous, slow-to-transfer result. We only ever need ONE
+#: qualifying control star, so bounding the response server-side (rather
+#: than fetching everything and filtering client-side) fixes the hang and is
+#: also the scientifically correct optimization -- a valid control must be
+#: near the target's own magnitude regardless, so a large unfiltered result
+#: was mostly stars we would immediately discard anyway.
+TIC_QUERY_PAGESIZE = 500
+
+
+def _query_tic_region(
+    ra_deg: float, dec_deg: float, radius_deg: float, pagesize: int = TIC_QUERY_PAGESIZE
+) -> list[TicMatch]:
     """Network call: cone-search the TESS Input Catalog around a sky position."""
     import astropy.units as u
     from astropy.coordinates import SkyCoord
     from astroquery.mast import Catalogs
 
     coord = SkyCoord(ra=ra_deg * u.deg, dec=dec_deg * u.deg, frame="icrs")
-    table = Catalogs.query_region(coord, radius=radius_deg * u.deg, catalog="TIC")
+    table = Catalogs.query_region(
+        coord, radius=radius_deg * u.deg, catalog="TIC", pagesize=pagesize
+    )
     return _parse_tic_table(table)
 
 
@@ -565,7 +582,7 @@ def fetch_tic_region(
     cached = _cache_get(cache, section, key, CACHE_TTL_DAYS[section], refresh)
     if cached is not None:
         return [TicMatch(**row) for row in cached]
-    matches = _query_tic_region(ra_deg, dec_deg, radius_deg)
+    matches = _query_tic_region(ra_deg, dec_deg, radius_deg, pagesize=TIC_QUERY_PAGESIZE)
     _cache_set(cache, section, key, [vars(m) for m in matches])
     _save_cache(cache_path, cache)
     return matches
@@ -642,6 +659,17 @@ def confirm_photometry(
 # -- Control-group matching ------------------------------------------------------
 
 
+#: Progressive cone-search radii tried by :func:`find_control_star_widening`
+#: when the default radius finds nothing. Bright stars are sparse on the sky
+#: -- a naked-eye disc host (Tmag ~6) found 2026-09-15 had no TIC neighbor
+#: within 1 magnitude inside a full 1 degree cone; the nearest similarly-bright
+#: star can be many degrees away. Growing the search radius is the physically
+#: correct fix (TESS Input Catalog density is dominated by faint stars, not a
+#: parameter to tune away); each step is a real MAST cone-search call, so this
+#: is capped rather than grown without bound.
+CONTROL_SEARCH_RADIUS_LADDER_DEG: tuple[float, ...] = (1.0, 3.0, 8.0, 15.0)
+
+
 def select_control_star(
     target: TicMatch,
     candidates: Sequence[TicMatch],
@@ -682,6 +710,43 @@ def select_control_star(
             best_key = key
             best = cand
     return best
+
+
+def find_control_star_widening(
+    cache: dict[str, Any],
+    cache_path: Path,
+    target: TicMatch,
+    ra_deg: float,
+    dec_deg: float,
+    excluded_tic_ids: AbstractSet[int],
+    refresh_cache: bool,
+    mag_tolerance: float = 0.5,
+    dist_tolerance_frac: float = 0.3,
+    radius_ladder: tuple[float, ...] = CONTROL_SEARCH_RADIUS_LADDER_DEG,
+) -> TicMatch | None:
+    """Try :func:`select_control_star` at successively wider cone-search radii.
+
+    Fixes the real failure mode found 2026-09-15: at the previous fixed 1
+    degree radius, every bright (Tmag <~ 7) disc host in a 10-target
+    verification run matched zero control stars, because the region around a
+    naked-eye star simply contains no other naked-eye star. Widening the
+    search is the honest fix -- a magnitude-matched control several degrees
+    away is still a valid control; loosening ``mag_tolerance`` instead would
+    have quietly weakened what "matched" means. Stops at the first radius
+    that yields any qualifying candidate; does not keep searching for a
+    *closer* one once one is found, since :func:`select_control_star` already
+    ranks by magnitude closeness first within a single candidate set.
+    """
+    for radius_deg in radius_ladder:
+        candidates = fetch_tic_region(
+            cache, cache_path, ra_deg, dec_deg, radius_deg, "control_candidates", refresh_cache
+        )
+        control = select_control_star(
+            target, candidates, excluded_tic_ids, mag_tolerance, dist_tolerance_frac
+        )
+        if control is not None:
+            return control
+    return None
 
 
 # -- Exclusion enforcement (the important part) ----------------------------------
@@ -841,12 +906,18 @@ def build_target_list(
                 )
             )
 
-        control_candidates = fetch_tic_region(
-            cache, cache_path, entry.ra_deg, entry.dec_deg,
-            control_search_radius_deg, "control_candidates", refresh_cache,
-        )
-        control = select_control_star(
-            tic, control_candidates, known_disc_tic_ids, mag_tolerance, dist_tolerance_frac
+        # --control-search-radius-deg is rung 0 of the widening ladder, so the
+        # existing CLI flag stays meaningful: it sets the starting radius,
+        # widening kicks in only when that starting radius finds nothing.
+        radius_ladder = tuple(
+            r for r in CONTROL_SEARCH_RADIUS_LADDER_DEG if r >= control_search_radius_deg
+        ) or (control_search_radius_deg,)
+        if radius_ladder[0] != control_search_radius_deg:
+            radius_ladder = (control_search_radius_deg, *radius_ladder)
+        control = find_control_star_widening(
+            cache, cache_path, tic, entry.ra_deg, entry.dec_deg,
+            known_disc_tic_ids, refresh_cache, mag_tolerance, dist_tolerance_frac,
+            radius_ladder=radius_ladder,
         )
         if control is not None:
             control_kepler_ok = control.kic_id is not None and confirm_photometry(
