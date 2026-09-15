@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """C2: train the comet classifier on accumulated C1 labels, with provenance.
 
 Loads one or more labelled-row parquets (from generate_training_labels.py),

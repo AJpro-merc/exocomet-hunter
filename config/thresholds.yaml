@@ -62,6 +62,13 @@ scoring:
   # Both asymmetry metrics must agree in sign (see docs/methodology.md for the
   # sign convention) for an event to be flagged.
   require_sign_agreement: true
+  # The flagging decision itself: BIC evidence for the comet profile over the
+  # symmetric one, and a fitted tail-to-core ratio above 1 (a trailing tail).
+  # A_dur / sigma is still reported, but is not used to decide, because the
+  # half-depth contour asymmetry can carry the wrong sign
+  # (docs/research_log/003-half-depth-contour-sign-error.md).
+  delta_bic_threshold: 10.0
+  tau_over_sigma_threshold: 1.0
   # Lomb-Scargle search range used for the periodicity flag that downweights
   # likely eclipsing binaries during ranking.
   periodicity_min_period_days: 0.5

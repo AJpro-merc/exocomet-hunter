@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Identification of candidate dimming events.
 
 The first pass is deliberately cheap and permissive: mark every cadence sitting

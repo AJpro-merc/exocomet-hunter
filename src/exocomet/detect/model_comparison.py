@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Parametric model comparison: is this dip better described as a comet?
 
 The asymmetry ratios in :mod:`exocomet.detect.asymmetry` are interpretable but
@@ -142,6 +145,7 @@ def compare_models(
     event: DipEvent,
     baseline_level: float,
     padding_factor: float = 1.5,
+    delta_bic_threshold: float = 10.0,
 ) -> ModelComparison | None:
     """Fit both profiles to one event and compare them by BIC.
 
@@ -157,6 +161,10 @@ def compare_models(
     padding_factor
         How much wider than the detected window to fit, as a multiple of the
         window duration.
+    delta_bic_threshold
+        Evidence threshold carried onto the returned comparison, so that
+        :attr:`ModelComparison.favors_comet` and the flagging decision in
+        :mod:`exocomet.detect.scoring` share one configured value.
 
     Returns
     -------
@@ -207,4 +215,6 @@ def compare_models(
         yerr=yerr,
     )
 
-    return ModelComparison(symmetric=symmetric, comet=comet)
+    return ModelComparison(
+        symmetric=symmetric, comet=comet, delta_bic_threshold=delta_bic_threshold
+    )

@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Core data structures shared by every stage of the pipeline.
 
 These types deliberately contain no dependency on ``lightkurve`` or any other
@@ -217,6 +220,10 @@ class ModelComparison:
 
     symmetric: ModelFit
     comet: ModelFit
+    #: Evidence threshold used by :attr:`favors_comet`. Carried on the record so
+    #: there is one source of truth: ``ScoringConfig.delta_bic_threshold`` is
+    #: threaded in when the comparison is built.
+    delta_bic_threshold: float = 10.0
 
     @property
     def delta_bic(self) -> float:
@@ -230,8 +237,8 @@ class ModelComparison:
 
     @property
     def favors_comet(self) -> bool:
-        """Whether the comet profile is strongly preferred (``delta_bic > 10``)."""
-        return self.delta_bic > 10.0
+        """Whether the comet profile is strongly preferred by the BIC."""
+        return self.delta_bic > self.delta_bic_threshold
 
     @property
     def tau_over_sigma(self) -> float:

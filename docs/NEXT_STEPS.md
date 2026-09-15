@@ -458,6 +458,59 @@ the whole thing beyond exocomets — all genuine, all further out than everythin
 
 ---
 
+## PART J — From the 2026-09-15 external reviews 🟢
+
+Two more outside critiques arrived 2026-09-15. Both are saved **verbatim** this time —
+[[External Review - Feature Sweep 2026-09-15]] and [[External Review - Repo Audit 2026-09-15]] —
+with the decisions and the dedupe alias table in [[External Review Triage 2026-09-15]]. Read the
+triage note before acting on either; roughly 15 of their items are PART A–I entries under different
+names and should not be re-filed.
+
+The cheap, concrete half was built the same day (A4, MAST timeouts, B1 investigation, B6 validation
+gate, B3/B4). What follows is what survived triage but is **not** being built yet.
+
+- **J1. Pixel-level validation / TPF centroids.** Both reviews rank this the single biggest missing
+  capability, and the README already admits it ("no pixel-level vetting yet"). For each candidate,
+  check the target pixel file: did the dimming actually come from the target star, or from a
+  background eclipsing binary bleeding into the aperture? Kills an entire class of false positive
+  that nothing currently catches. Belongs in `vetting/`, which is still an empty folder.
+- **J2. Empirical look-elsewhere correction.** Sharper than D5's current framing. At 0.8 s/star the
+  honest measurement is affordable: run the *same* detector over ~10,000 quiet or time-reversed
+  light curves and quote "N candidates per 10,000 null curves at this threshold." That is a
+  defensible false-alarm rate, unlike a formal p-value the project cannot yet justify.
+- **J3. Sector-overlap test (TESS).** One extra column, `n_independent_sectors`. A dip present in one
+  SPOC sector but absent from the overlapping sector is almost always instrumental. `lc.meta` already
+  carries the sector list after the A2 fix, so this is cheap.
+- **J4. Candidate JSON schema.** One file per event — id, pipeline version, epoch, depth, τ/σ, ΔBIC,
+  vetting sub-results, status. A GitHub Pages explorer can read it later. Explicitly **not** React first.
+- **J5. Physical forward model as a second injector class.** A dusty tail in front of a limb-darkened
+  star, β set from host luminosity — then ask whether a physically real tail produces the τ/σ we fit.
+  Refines F2 with a concrete shape, and **keeps** the existing parametric injector rather than
+  replacing it, so old results stay comparable.
+- **J6. β Pic as validation target #3.** After B5 (KIC 11084727's missing epoch). Recovering a
+  *different* star with the SPOC-pinned loader is what stops this looking like a one-star demo.
+- **J7. Bayesian candidate probability.** P(exocomet | data) reported alongside frequentist
+  significance, incorporating morphology, noise, contamination and measured completeness.
+- **J8. Stellar-property-aware detection.** Use radius, spectral type, age, variability, known
+  debris disk / planets / binarity to ask whether a candidate is *plausible for this host star*.
+- **J9. Case-file / scientific report export.** Per candidate: every plot, test result, and full
+  provenance as PDF + JSON + CSV. Overlaps E3 and PART I-7; this is the export format for them.
+- **J10. Live "stars currently being analysed" counter.** Atharva's reframing (2026-09-15) and the
+  better one: a *present-tense* activity readout, not a static "1,284,391 analyzed" vanity total.
+  The static number is a brag; the live one shows a pipeline that genuinely runs every 2h, which is
+  a real differentiator. Only after the six-event exam is green.
+
+**Rejected outright** (recorded so they don't come back): the static vanity-total website; a weekly
+discovery digest (Cloud routine 3 already covers it); and a 0–100 "Exocomet Priority Score" built
+from invented weights — it manufactures precision the underlying numbers don't support and would be
+the first thing a referee attacks. If ranking is wanted, rank by one defensible statistic.
+
+**Both reviews independently agreed on the ordering already in this document**: finish the exam
+before scaling, pixels are the biggest gap, never let an AI decide what counts as a comet, and
+candidates are not confirmations. Independent agreement is evidence the existing priorities are right.
+
+---
+
 ## Reference: commands that are easy to forget
 
 ```bash

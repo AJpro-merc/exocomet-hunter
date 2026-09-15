@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Measurement of dip asymmetry — the discriminating step of the pipeline.
 
 A planet is an opaque disc: it covers the star and uncovers it at the same rate,

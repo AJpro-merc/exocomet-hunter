@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Empirically vet candidate hosts for the C1 training list (Next Steps C1/C6).
 
 Found 2026-09-14: the hand-curated ``KEPLER_HOST_STARS`` list was never

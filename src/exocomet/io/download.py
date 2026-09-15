@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Light-curve retrieval from MAST, with a stream-and-discard option.
 
 The archive is the source of truth. Kepler and TESS photometry is public and
@@ -16,8 +19,11 @@ from __future__ import annotations
 
 import logging
 import shutil
-from collections.abc import Iterator
+import threading
+import time
+from collections.abc import Callable, Iterator
 from pathlib import Path
+from typing import TypeVar
 
 import numpy as np
 
@@ -25,9 +31,180 @@ from exocomet.core.types import LightCurveData
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["MastLightCurveSource", "fetch_light_curve", "iter_light_curves"]
+__all__ = [
+    "MastLightCurveSource",
+    "MastTimeoutError",
+    "fetch_light_curve",
+    "iter_light_curves",
+]
 
 DEFAULT_CACHE_DIR = Path("data/raw")
+
+# -- Network bounds -----------------------------------------------------------
+#
+# Every MAST call in this module is bounded. Before 2026-09-15 none of them
+# were: a fetch for KIC 3542116 sat at zero CPU for nine minutes and had to be
+# killed, twice. The 17 FITS files in the cache were all complete and all
+# written inside one minute, so the bytes had arrived -- the process was
+# blocked on a socket that never returned and had no deadline to hit. These
+# constants exist so that a stall fails loudly instead of silently forever.
+
+#: Wall-clock ceiling for the MAST catalogue query. It returns a small table;
+#: a minute is already an order of magnitude more than the healthy case.
+DEFAULT_SEARCH_TIMEOUT = 60.0
+
+#: Wall-clock ceiling for the bulk FITS fetch. The observed healthy download of
+#: 17 Kepler quarters completed in under a minute, so 5 minutes is roughly a
+#: 5x margin for a slow link without tolerating an indefinite stall.
+DEFAULT_DOWNLOAD_TIMEOUT = 300.0
+
+#: Total attempts per network call (so at most two retries). Bounded on
+#: purpose: an unattended batch must not spin forever on one sick target.
+DEFAULT_MAX_ATTEMPTS = 3
+
+#: Base backoff in seconds between attempts; doubles each time (5s, 10s).
+DEFAULT_RETRY_BACKOFF = 5.0
+
+#: Hard per-target ceiling used by :func:`iter_light_curves`. Trumps the inner
+#: budgets above: worst case they sum to ~18 minutes across three attempts of
+#: both calls, and no single star in a batch deserves that much of the run.
+DEFAULT_TARGET_BUDGET = 900.0
+
+#: Socket-level timeout handed to astroquery for each individual HTTP request.
+#: astroquery's own default (600s) applies per request, which for a bulk
+#: download means an effectively unbounded total.
+ASTROQUERY_TIMEOUT = 120.0
+
+#: astroquery's default page size is 50000 rows; smaller pages mean each
+#: request is short enough for ``ASTROQUERY_TIMEOUT`` to be a meaningful bound.
+ASTROQUERY_PAGESIZE = 5000
+
+_T = TypeVar("_T")
+
+
+class MastTimeoutError(TimeoutError):
+    """A MAST network call exceeded its wall-clock budget.
+
+    Subclasses :class:`TimeoutError`, so existing ``except OSError`` /
+    ``except Exception`` handlers (including ``skip_errors`` in
+    :func:`iter_light_curves`) keep working unchanged.
+    """
+
+
+def _configure_astroquery(
+    timeout: float = ASTROQUERY_TIMEOUT, pagesize: int = ASTROQUERY_PAGESIZE
+) -> None:
+    """Pin astroquery's MAST timeouts to bounded values.
+
+    Lazy and local, matching the ``import lightkurve as lk`` style below:
+    astroquery is a heavy import and is only needed on the network path.
+    Best-effort -- the private ``_portal_api_connection`` /
+    ``_service_api_connection`` attributes are the only place the per-request
+    timeout actually lives, and their names have moved between astroquery
+    releases. Failing to tune them must never fail a download, because the
+    thread-based budget below is the real backstop.
+    """
+    try:
+        from astroquery.mast import Observations, conf
+
+        conf.timeout = timeout
+        conf.pagesize = pagesize
+        for connection in (
+            getattr(Observations, "_portal_api_connection", None),
+            getattr(Observations, "_service_api_connection", None),
+        ):
+            if connection is None:
+                continue
+            if hasattr(connection, "TIMEOUT"):
+                connection.TIMEOUT = timeout
+            if hasattr(connection, "PAGESIZE"):
+                connection.PAGESIZE = pagesize
+    except Exception as exc:  # pragma: no cover - depends on astroquery internals
+        logger.debug("could not configure astroquery timeouts: %s", exc)
+
+
+def _call_with_timeout(func: Callable[[], _T], timeout: float, description: str) -> _T:
+    """Run ``func`` on a daemon thread and give up waiting after ``timeout``.
+
+    A daemon thread rather than ``concurrent.futures`` on purpose: a stalled
+    MAST socket cannot be cancelled from outside, so the worker may still be
+    alive when we stop waiting. Daemon threads do not block interpreter exit,
+    whereas ``ThreadPoolExecutor`` joins its workers at shutdown and would turn
+    a bounded call back into a hang at the end of the process.
+
+    The honest limitation: this bounds *how long the caller waits*, and the
+    orphaned thread keeps holding its socket until astroquery's own
+    ``ASTROQUERY_TIMEOUT`` trips. That is why both layers are set.
+    """
+    box: dict[str, object] = {}
+
+    def runner() -> None:
+        try:
+            box["value"] = func()
+        except BaseException as exc:  # re-raised on the calling thread
+            box["error"] = exc
+
+    thread = threading.Thread(target=runner, name=f"mast-{description}", daemon=True)
+    thread.start()
+    thread.join(timeout)
+
+    if thread.is_alive():
+        raise MastTimeoutError(
+            f"{description} exceeded its {timeout:.0f}s budget and was abandoned "
+            "(the underlying request may still be stalled in the background)"
+        )
+    if "error" in box:
+        raise box["error"]  # type: ignore[misc]
+    return box["value"]  # type: ignore[return-value]
+
+
+def _call_with_retries(
+    func: Callable[[], _T],
+    timeout: float,
+    description: str,
+    max_attempts: int = DEFAULT_MAX_ATTEMPTS,
+    backoff: float = DEFAULT_RETRY_BACKOFF,
+    cleanup: Callable[[], None] | None = None,
+) -> _T:
+    """Bounded retry around :func:`_call_with_timeout`: never infinite.
+
+    ``cleanup``, if given, runs after a failed attempt and before the next
+    one (never after the last, exhausted attempt). Found necessary
+    2026-09-15 by direct observation: a download interrupted partway leaves a
+    truncated FITS file cached on disk, and simply calling ``download_all``
+    again does not fix it -- ``astropy``/``lightkurve`` finds the file already
+    present at its cache path and does not know it is broken, so every retry
+    fails identically on the same corrupt file instead of re-fetching it. A
+    retry with no cleanup is not actually a retry in that case, just the same
+    failure repeated on a timer. See ``_discard_cached`` for what the caller
+    passes at the ``download_all`` call site.
+    """
+    attempts = max(1, int(max_attempts))
+    last_exc: BaseException | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            return _call_with_timeout(func, timeout, description)
+        except Exception as exc:
+            last_exc = exc
+            if attempt == attempts:
+                break
+            delay = backoff * (2 ** (attempt - 1))
+            logger.warning(
+                "%s failed (attempt %d/%d): %s -- retrying in %.0fs",
+                description,
+                attempt,
+                attempts,
+                exc,
+                delay,
+            )
+            if cleanup is not None:
+                try:
+                    cleanup()
+                except Exception:  # noqa: BLE001 - cleanup failing must not mask last_exc
+                    logger.warning("cleanup before retry of %s raised", description, exc_info=True)
+            time.sleep(delay)
+    assert last_exc is not None
+    raise last_exc
 
 
 def _to_light_curve_data(
@@ -114,6 +291,10 @@ def fetch_light_curve(
     cache_dir: Path | str = DEFAULT_CACHE_DIR,
     discard_after_read: bool = False,
     quality_bitmask: str = "default",
+    search_timeout: float = DEFAULT_SEARCH_TIMEOUT,
+    download_timeout: float = DEFAULT_DOWNLOAD_TIMEOUT,
+    max_attempts: int = DEFAULT_MAX_ATTEMPTS,
+    retry_backoff: float = DEFAULT_RETRY_BACKOFF,
 ) -> LightCurveData:
     """Download, stitch and normalise all available photometry for one target.
 
@@ -142,6 +323,14 @@ def fetch_light_curve(
     quality_bitmask
         Passed to ``lightkurve``; the default mask removes cadences the mission
         pipeline flagged as bad.
+    search_timeout, download_timeout
+        Wall-clock ceilings in seconds for the catalogue query and the bulk
+        FITS fetch respectively. Exceeding one raises :class:`MastTimeoutError`
+        rather than blocking forever.
+    max_attempts, retry_backoff
+        Bounded retry policy applied to each of those two calls: at most
+        ``max_attempts`` tries, sleeping ``retry_backoff * 2**(n-1)`` seconds
+        between them.
 
     Returns
     -------
@@ -155,6 +344,9 @@ def fetch_light_curve(
     FileNotFoundError
         If the archive returns no products for this target, mission, author
         and exptime combination.
+    MastTimeoutError
+        If the catalogue query or the bulk download exceeds its budget on
+        every attempt.
 
     Notes
     -----
@@ -173,6 +365,8 @@ def fetch_light_curve(
     """
     import lightkurve as lk
 
+    _configure_astroquery()
+
     cache = Path(cache_dir)
     cache.mkdir(parents=True, exist_ok=True)
 
@@ -188,7 +382,13 @@ def fetch_light_curve(
         search_kwargs["cadence"] = cadence
         search_kwargs["author"] = resolved_author
 
-    search = lk.search_lightcurve(target_id, **search_kwargs)
+    search = _call_with_retries(
+        lambda: lk.search_lightcurve(target_id, **search_kwargs),
+        timeout=search_timeout,
+        description=f"search_lightcurve({target_id!r})",
+        max_attempts=max_attempts,
+        backoff=retry_backoff,
+    )
     if len(search) == 0:
         raise FileNotFoundError(
             f"no {mission} light curves found for {target_id} "
@@ -203,7 +403,16 @@ def fetch_light_curve(
         resolved_author,
         resolved_exptime,
     )
-    collection = search.download_all(download_dir=str(cache), quality_bitmask=quality_bitmask)
+    collection = _call_with_retries(
+        lambda: search.download_all(download_dir=str(cache), quality_bitmask=quality_bitmask),
+        timeout=download_timeout,
+        description=f"download_all({target_id!r})",
+        max_attempts=max_attempts,
+        backoff=retry_backoff,
+        cleanup=lambda: _discard_cached(cache, target_id),
+    )
+    # .stitch() is local CPU work on already-downloaded arrays -- no network,
+    # so deliberately left unbounded.
     stitched = collection.stitch()
 
     data = _to_light_curve_data(
@@ -265,6 +474,11 @@ def iter_light_curves(
     cache_dir: Path | str = DEFAULT_CACHE_DIR,
     discard_after_read: bool = True,
     skip_errors: bool = True,
+    per_target_timeout: float | None = DEFAULT_TARGET_BUDGET,
+    search_timeout: float = DEFAULT_SEARCH_TIMEOUT,
+    download_timeout: float = DEFAULT_DOWNLOAD_TIMEOUT,
+    max_attempts: int = DEFAULT_MAX_ATTEMPTS,
+    retry_backoff: float = DEFAULT_RETRY_BACKOFF,
 ) -> Iterator[LightCurveData]:
     """Yield light curves one at a time, discarding each after it is consumed.
 
@@ -280,10 +494,27 @@ def iter_light_curves(
         When ``True``, log and skip targets that fail to download rather than
         aborting the whole batch — one unavailable star should not end a run
         over thousands.
+    per_target_timeout
+        Hard wall-clock budget in seconds for one target, covering the whole
+        of :func:`fetch_light_curve` including its internal retries. ``None``
+        disables the outer budget and leaves only the per-call ones. This is
+        what stops a single hung star from stalling an entire batch: before
+        2026-09-15 ``skip_errors`` could only skip a target that *failed*, and
+        a target that simply never returned held the loop forever.
+
+    Notes
+    -----
+    A target abandoned at ``per_target_timeout`` leaves its worker thread
+    running. If that zombie later completes with ``discard_after_read=True``
+    it will wipe the shared ``mastDownload`` tree, possibly underneath the
+    next target's download. The blast radius is a redundant re-download rather
+    than corrupt science, but per-target cache subdirectories (Next Steps E4)
+    would remove it entirely.
     """
     for target_id in target_ids:
-        try:
-            yield fetch_light_curve(
+
+        def _fetch(target_id: str = target_id) -> LightCurveData:
+            return fetch_light_curve(
                 target_id,
                 mission=mission,
                 cadence=cadence,
@@ -291,7 +522,19 @@ def iter_light_curves(
                 exptime=exptime,
                 cache_dir=cache_dir,
                 discard_after_read=discard_after_read,
+                search_timeout=search_timeout,
+                download_timeout=download_timeout,
+                max_attempts=max_attempts,
+                retry_backoff=retry_backoff,
             )
+
+        try:
+            if per_target_timeout is None:
+                yield _fetch()
+            else:
+                yield _call_with_timeout(
+                    _fetch, per_target_timeout, f"fetch_light_curve({target_id!r})"
+                )
         except Exception as exc:
             if not skip_errors:
                 raise
@@ -308,12 +551,18 @@ class MastLightCurveSource:
         author: str | None = None,
         exptime: int | None = None,
         discard_after_read: bool = False,
+        search_timeout: float = DEFAULT_SEARCH_TIMEOUT,
+        download_timeout: float = DEFAULT_DOWNLOAD_TIMEOUT,
+        max_attempts: int = DEFAULT_MAX_ATTEMPTS,
     ) -> None:
         self.cache_dir = Path(cache_dir)
         self.cadence = cadence
         self.author = author
         self.exptime = exptime
         self.discard_after_read = discard_after_read
+        self.search_timeout = search_timeout
+        self.download_timeout = download_timeout
+        self.max_attempts = max_attempts
 
     def fetch(self, target_id: str, mission: str) -> LightCurveData:
         """Retrieve one target's photometry from the archive."""
@@ -325,4 +574,7 @@ class MastLightCurveSource:
             exptime=self.exptime,
             cache_dir=self.cache_dir,
             discard_after_read=self.discard_after_read,
+            search_timeout=self.search_timeout,
+            download_timeout=self.download_timeout,
+            max_attempts=self.max_attempts,
         )

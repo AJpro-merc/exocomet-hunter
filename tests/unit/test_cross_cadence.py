@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Cross-cadence consistency test.
 
 The same physical event, detected the same way regardless of whether it was

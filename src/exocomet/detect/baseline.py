@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Local baseline and robust noise estimation.
 
 Both quantities are computed with running medians rather than running means so

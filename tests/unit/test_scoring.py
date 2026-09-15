@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """End-to-end detector behaviour: what gets flagged, and what must not."""
 
 from __future__ import annotations
@@ -35,14 +38,28 @@ class TestDetectorFlagging:
         assert len(records) == 1
         assert not records[0].score.flagged
 
-    def test_reversed_asymmetry_is_flagged_with_the_opposite_sign(
-        self, reversed_comet_lc
-    ) -> None:
+    def test_reversed_asymmetry_is_not_flagged(self, reversed_comet_lc) -> None:
+        """Slow ingress, fast egress is backwards for a comet: never a candidate.
+
+        The sign of ``A_dur`` still records which way round the event is, and is
+        still reported; it is the flagging decision that must not be sign-blind.
+        """
         records = AsymmetricDipDetector(FAST).run(reversed_comet_lc)
         assert len(records) == 1
-        assert records[0].score.flagged
+        assert not records[0].score.flagged
         assert records[0].event.asymmetry is not None
         assert records[0].event.asymmetry.a_dur < 0.0
+
+    def test_reversed_asymmetry_still_reports_significance(
+        self, reversed_comet_lc
+    ) -> None:
+        """The contour statistics survive as output columns, not as the decision."""
+        records = AsymmetricDipDetector(FAST).run(reversed_comet_lc)
+        assert len(records) == 1
+        score = records[0].score
+        assert not score.flagged
+        assert score.significance > 0.0
+        assert score.tau_over_sigma < FAST.scoring.tau_over_sigma_threshold
 
 
 class TestSignificance:

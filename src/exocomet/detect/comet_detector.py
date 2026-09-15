@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """The asymmetric-dip detector: the first concrete :class:`Detector`.
 
 This class is deliberately thin. It owns no science of its own; it sequences the

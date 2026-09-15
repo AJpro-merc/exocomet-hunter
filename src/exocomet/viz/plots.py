@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Diagnostic and publication figures.
 
 Plots here are working instruments, not decoration: the per-event figure exists
@@ -24,6 +27,7 @@ __all__ = [
     "plot_detrend_comparison",
     "plot_event",
     "plot_light_curve",
+    "plot_tail_direction",
 ]
 
 PPM = 1.0e6
@@ -219,5 +223,136 @@ def plot_asymmetry_distribution(
     ax.set_ylabel("Number of events")
     ax.legend(fontsize=8)
     ax.grid(alpha=0.2)
+    fig.tight_layout()
+    return _save(fig, path)
+
+
+def _inject_ramped_dip(
+    time: FloatArray,
+    flux: FloatArray,
+    t0: float,
+    depth: float,
+    ingress_duration: float,
+    egress_duration: float,
+) -> FloatArray:
+    """Add one piecewise-linear dip with independently set ramp durations."""
+    out = flux.copy()
+    falling = (time >= t0 - ingress_duration) & (time <= t0)
+    out[falling] -= depth * (1.0 - (t0 - time[falling]) / ingress_duration)
+    rising = (time > t0) & (time <= t0 + egress_duration)
+    out[rising] -= depth * (1.0 - (time[rising] - t0) / egress_duration)
+    return out
+
+
+def plot_tail_direction(
+    path: Path | str | None = None,
+    config: "PipelineConfig | None" = None,
+    depth: float = 2.0e-3,
+    fast_ramp_days: float = 0.1,
+    slow_ramp_days: float = 0.5,
+    noise_sigma: float = 1.0e-4,
+) -> Path | None:
+    """Show that the flagging rule discriminates tail DIRECTION, not asymmetry.
+
+    Two synthetic events are built with identical depth and identical ramp
+    durations, differing only in which side is the slow one: a trailing tail
+    (fast ingress, slow egress — the physical comet case) and a leading tail
+    (the time-reverse, which no dust tail produces). Both are strongly
+    asymmetric, so a rule built on ``|A_dur|`` flags both. The rule based on
+    ``delta_bic`` and ``tau_over_sigma`` flags only the trailing-tail event,
+    which is the whole point of the fix.
+
+    Everything here is generated in-process; nothing is read from disk or the
+    network, so the figure is reproducible from the source alone.
+    """
+    from exocomet.core.config import PipelineConfig
+    from exocomet.detect.comet_detector import AsymmetricDipDetector
+
+    cfg = config or PipelineConfig()
+    detector = AsymmetricDipDetector(cfg)
+
+    cadence = 0.02043  # Kepler long cadence, days
+    n_points = 2000
+    time = np.arange(n_points, dtype=np.float64) * cadence
+    t0 = float(time[n_points // 2])
+
+    panels = (
+        ("Trailing tail (comet-like)", fast_ramp_days, slow_ramp_days, 11),
+        ("Leading tail (time-reversed)", slow_ramp_days, fast_ramp_days, 12),
+    )
+
+    fig, axes = plt.subplots(1, 2, figsize=(13, 4.8), sharey=True)
+    for ax, (label, ingress, egress, seed) in zip(axes, panels, strict=True):
+        rng = np.random.default_rng(seed)
+        flux = 1.0 + rng.normal(0.0, noise_sigma, size=n_points)
+        flux = _inject_ramped_dip(time, flux, t0, depth, ingress, egress)
+        flux_err = np.full(n_points, noise_sigma, dtype=np.float64)
+
+        lc = LightCurveData(
+            target_id=f"SYNTHETIC-{label}",
+            mission="SYNTHETIC",
+            time=time,
+            flux=flux,
+            flux_err=flux_err,
+            meta={"synthetic": True, "noise_sigma": noise_sigma},
+        )
+        records = detector.run(lc)
+
+        span = 4.0 * max(ingress, egress)
+        mask = (time >= t0 - span) & (time <= t0 + span)
+        ax.errorbar(
+            (time[mask] - t0) * 24.0,
+            (flux[mask] - 1.0) * PPM,
+            yerr=flux_err[mask] * PPM,
+            fmt="o",
+            ms=2.0,
+            lw=0.4,
+            color="0.3",
+            alpha=0.8,
+        )
+        ax.axvline(0.0, color="tab:blue", lw=0.8, ls="-", alpha=0.6)
+
+        if records:
+            score = records[0].score
+            verdict = "FLAGGED" if score.flagged else "not flagged"
+            colour = "tab:green" if score.flagged else "tab:red"
+            a_dur = (
+                f"{records[0].event.asymmetry.a_dur:+.2f}"
+                if records[0].event.asymmetry is not None
+                else "n/a"
+            )
+            stats = (
+                rf"$\Delta$BIC = {score.delta_bic:.0f}   "
+                rf"$\tau/\sigma$ = {score.tau_over_sigma:.2f}   "
+                rf"$A_{{dur}}$ = {a_dur}"
+            )
+        else:
+            verdict, colour = "no event detected", "tab:red"
+            stats = "—"
+
+        ax.set_title(
+            f"{label}\ningress {ingress * 24:.1f} h / egress {egress * 24:.1f} h",
+            fontsize=10,
+        )
+        ax.annotate(
+            f"{verdict}\n{stats}",
+            xy=(0.03, 0.06),
+            xycoords="axes fraction",
+            fontsize=8.5,
+            color=colour,
+            va="bottom",
+        )
+        ax.set_xlabel("Hours from minimum")
+        ax.grid(alpha=0.2)
+
+    axes[0].set_ylabel("Relative flux (ppm)")
+    fig.suptitle(
+        "Flagging on "
+        rf"$\Delta$BIC > {cfg.scoring.delta_bic_threshold:g} and "
+        rf"$\tau/\sigma$ > {cfg.scoring.tau_over_sigma_threshold:g}"
+        " keeps only the trailing tail;\nthe two events are mirror images, so "
+        r"$|A_{dur}|$ alone cannot tell them apart",
+        fontsize=10,
+    )
     fig.tight_layout()
     return _save(fig, path)

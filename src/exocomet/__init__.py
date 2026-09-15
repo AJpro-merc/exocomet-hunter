@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Exocomet Hunter: detection of asymmetric, comet-like transits in stellar photometry.
 
 The package is organised as a small framework rather than a single script:

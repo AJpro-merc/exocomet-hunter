@@ -1,0 +1,125 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Resumable hourly ingestion (scripts/ingest.py). Generation only -- no
+# training here. Training happens manually, watched, when Atharva reviews the
+# accumulated data (see docs/Session Log 2026-09-15 for why: an
+# unwatched weekly cron retraining on unreviewed predictions was the wrong
+# design, corrected this session).
+#
+# Every hour: fetch one target, save the extract (time/flux/flux_err, the
+# permanent detector-independent layer), delete the raw FITS, run the
+# detector, save the results, append one ledger line -- in that exact order,
+# so a killed run can never claim success for work that didn't land. See
+# scripts/ingest.py's module docstring for the full ordering guarantee.
+#
+# All output lives in AJpro-merc/exocomet-hunter-data (extract/, results/,
+# ledger.jsonl), not this repo's git history -- same DATA_REPO_TOKEN secret
+# train.yml already uses. Until that secret exists, the push step fails
+# loudly, which is correct (see train.yml's own comment on this).
+
+name: ingest
+
+on:
+  schedule:
+    - cron: "0 * * * *" # every hour
+  workflow_dispatch:
+    inputs:
+      time_budget_minutes:
+        description: "Minutes to spend ingesting before stopping"
+        required: false
+        default: "25"
+      max_targets:
+        description: "Optional cap on targets this run (leave blank for no cap)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ingest
+  cancel-in-progress: false
+
+env:
+  DATA_REPO: AJpro-merc/exocomet-hunter-data
+
+jobs:
+  kepler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Clone data repo
+        run: |
+          git clone "https://x-access-token:${{ secrets.DATA_REPO_TOKEN }}@github.com/${DATA_REPO}.git" data-repo
+      - name: Ingest Kepler targets
+        run: |
+          python scripts/ingest.py \
+            --mission Kepler \
+            --data-repo-dir data-repo \
+            --time-budget-minutes "${{ github.event.inputs.time_budget_minutes || 25 }}" \
+            ${{ github.event.inputs.max_targets != '' && format('--max-targets {0}', github.event.inputs.max_targets) || '' }}
+      - name: Test
+        run: pytest tests/unit -q
+      - name: Commit results to data repo
+        run: |
+          cd data-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f ledger.jsonl extract/Kepler/ results/Kepler/
+          if git diff --staged --quiet; then
+            echo "No new Kepler targets this run."
+          else
+            git commit -m "kepler ingest: automated run $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git pull --rebase --autostash
+            git push
+          fi
+
+  tess:
+    needs: kepler # sequenced, not parallel -- both push to the same data repo
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Clone data repo
+        run: |
+          git clone "https://x-access-token:${{ secrets.DATA_REPO_TOKEN }}@github.com/${DATA_REPO}.git" data-repo
+      - name: Ingest TESS targets
+        run: |
+          python scripts/ingest.py \
+            --mission TESS \
+            --data-repo-dir data-repo \
+            --time-budget-minutes "${{ github.event.inputs.time_budget_minutes || 25 }}" \
+            ${{ github.event.inputs.max_targets != '' && format('--max-targets {0}', github.event.inputs.max_targets) || '' }}
+      - name: Test
+        run: pytest tests/unit -q
+      - name: Commit results to data repo
+        run: |
+          cd data-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f ledger.jsonl extract/TESS/ results/TESS/
+          if git diff --staged --quiet; then
+            echo "No new TESS targets this run."
+          else
+            git commit -m "tess ingest: automated run $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git pull --rebase --autostash
+            git push
+          fi

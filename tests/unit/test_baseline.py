@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Baseline and noise estimation on data with a known answer."""
 
 from __future__ import annotations

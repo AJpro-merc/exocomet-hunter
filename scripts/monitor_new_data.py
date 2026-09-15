@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Check the archive for new observations and search them for exocomet transits.
 
 Designed to run unattended on a schedule. TESS is still observing, so new

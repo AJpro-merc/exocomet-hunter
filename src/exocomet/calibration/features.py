@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Feature extraction: turning a detected event into a row of numbers.
 
 The classifier never sees a light curve. It sees only the measurements this
