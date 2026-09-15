@@ -1,0 +1,83 @@
+# Tunable pipeline parameters.
+#
+# Every number the detection pipeline depends on lives here rather than being
+# hardcoded, so that each choice can be cited, justified in the methodology
+# write-up, and varied in sensitivity tests without touching code.
+
+detrend:
+  # Savitzky-Golay window in days (not cadences: TESS ranges from 20 s to
+  # 1800 s cadence, versus Kepler's 29.4 min, so a fixed cadence count would
+  # mean wildly different physical windows across missions). Must be >> the
+  # longest expected dip so that real events survive detrending; ~8.2 days is
+  # comfortably above the ~1 day dips reported by Rappaport et al. (2018).
+  # Converted to a cadence count at runtime from each light curve's own
+  # measured spacing.
+  window_days: 8.1871
+  polyorder: 2
+  # Points this far above the trend are clipped before fitting (upward
+  # outliers only; downward excursions are the signal we are looking for).
+  upper_sigma_clip: 5.0
+  # Spline alternative, used for the detrending-method comparison figure.
+  spline_knot_spacing_days: 1.5
+
+baseline:
+  # Rolling-median window (days, converted to cadences at runtime — see
+  # detrend.window_days above) used as the local out-of-dip reference level,
+  # and the matching window for the robust (MAD-based) noise estimate.
+  median_window_days: 2.0621
+  noise_window_days: 2.0621
+
+candidates:
+  # A cadence is "in dip" when it sits this many robust sigma below baseline.
+  sigma_threshold: 4.0
+  # Consecutive in-dip cadences required, to reject single-cadence cosmic-ray
+  # hits and other one-sample glitches.
+  min_consecutive: 3
+  # In-dip runs separated by at most this many cadences are merged into one event.
+  max_gap_cadences: 2
+  # Hard cap on event duration, so a long instrumental excursion cannot grow
+  # an unbounded window.
+  max_window_days: 3.0
+  # Window edges extend outward until flux recovers to within this many sigma
+  # of the local baseline.
+  recovery_sigma: 1.0
+  # Events falling entirely within this many days of either end of the
+  # series are discarded. Baseline and noise are estimated from truncated
+  # windows there, and sector/quarter boundaries are a known artefact source.
+  edge_margin_days: 1.0208
+
+asymmetry:
+  # Fraction of the event depth at which ingress/egress durations are measured
+  # (0.5 = half-depth crossing, i.e. a FWHM-style half duration per side).
+  half_depth_fraction: 0.5
+  # Minimum cadences on a side for its slope fit to be trusted; events with a
+  # side below this are marked unmeasurable rather than scored on noise.
+  min_points_per_side: 3
+
+scoring:
+  # Bootstrap draws used to estimate the uncertainty on the duration asymmetry.
+  bootstrap_draws: 1000
+  # |A_dur| / sigma(A_dur) required to call an event significantly asymmetric.
+  significance_threshold: 3.0
+  # Both asymmetry metrics must agree in sign (see docs/methodology.md for the
+  # sign convention) for an event to be flagged.
+  require_sign_agreement: true
+  # Lomb-Scargle search range used for the periodicity flag that downweights
+  # likely eclipsing binaries during ranking.
+  periodicity_min_period_days: 0.5
+  periodicity_max_period_days: 50.0
+  # False-alarm probability below which a periodogram peak is considered a
+  # genuine periodic signal.
+  periodicity_fap_threshold: 0.01
+
+search:
+  # Number of stars pulled into the search batch by scripts/build_target_list.py.
+  target_batch_size: 40
+  # Candidates carried through to per-event diagnostic plots and manual vetting.
+  shortlist_size: 20
+
+runtime:
+  # Single seed threaded through every stochastic step, so runs are reproducible.
+  rng_seed: 42
+  # Worker processes for the batch search; null means "os.cpu_count() - 1".
+  max_workers: null
