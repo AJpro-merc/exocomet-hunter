@@ -1,0 +1,55 @@
+# Validation targets: stars with exocomet-like dips already reported in the
+# refereed literature. The pipeline must recover these before any result from
+# the blind search is trusted (see docs/methodology.md, "Validation gate").
+#
+# Epochs below are transcribed from Table 3 of the reference paper, not inferred
+# from our own detections -- the validation gate is only meaningful if it
+# compares against numbers that came from the literature.
+#
+# Epochs are BKJD (BJD - 2454833), the native Kepler time system.
+# Quoted epoch uncertainty in the paper is +/- 0.02 d; `match_tolerance_days`
+# below is set far looser because our pipeline reports the flux minimum, which
+# need not coincide exactly with the paper's fitted epoch.
+
+match_tolerance_days: 0.5
+
+targets:
+  - target_id: "KIC 3542116"
+    mission: "Kepler"
+    reference: "Rappaport et al. 2018, MNRAS 474(2):1453 (arXiv:1708.06069)"
+    description: >-
+      F2V star showing several asymmetric, comet-shaped dips: a steep ingress
+      followed by a slower egress, aperiodic, with depths of order 0.1% and
+      durations of order a day. The primary validation target.
+    expected_dip_count: 6
+    dips:
+      - t_min_bkjd: 139.98
+        depth_ppm: 491
+        note: "D140, shallow"
+      - t_min_bkjd: 742.45
+        depth_ppm: 524
+        note: "D742, shallow"
+      - t_min_bkjd: 792.78
+        depth_ppm: 679
+        note: "D793, shallow"
+      - t_min_bkjd: 991.95
+        depth_ppm: 1200
+        note: "D992, deep"
+      - t_min_bkjd: 1175.62
+        depth_ppm: 1500
+        note: "D1176, deep"
+      - t_min_bkjd: 1268.10
+        depth_ppm: 1900
+        note: "D1268, deep"
+
+  - target_id: "KIC 11084727"
+    mission: "Kepler"
+    reference: "Rappaport et al. 2018, MNRAS 474(2):1453 (arXiv:1708.06069)"
+    description: >-
+      Secondary target from the same paper, with one reported comet-shaped
+      transit and host-star properties similar to KIC 3542116.
+    expected_dip_count: 1
+    # Epoch not yet transcribed -- the paper reports one comet-shaped transit for
+    # this star but its epoch was not captured in the table extraction. Read it
+    # from the paper before enabling this target in the validation gate.
+    dips: []

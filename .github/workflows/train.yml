@@ -1,0 +1,229 @@
+# Scheduled classifier training pipeline (Next Steps C1/C2).
+#
+# Claude Cloud routines cannot reach mast.stsci.edu (a 403 from the sandbox's
+# own egress proxy, confirmed 2026-09-14 -- see docs/NEXT_STEPS.md
+# and Findings Log). GitHub Actions runners have normal internet access and
+# proved they can reach MAST for real. So generation and training both run
+# here; a separate Claude Cloud routine reads and reports on the results
+# (docs/cloud-routine-prompt-training.md) -- it just cannot do the download
+# or training steps itself.
+#
+# Two schedules, one workflow, jobs conditioned on which one fired:
+#   - every 2 hours: generate more labelled rows (kepler always-safe, tess
+#     pinned to SPOC/120s post-A2-fix).
+#   - weekly (Monday 06:00 UTC): retrain both models from everything
+#     accumulated so far. Runs `if: always()` against whatever data exists,
+#     even if that cycle's generation jobs didn't run or one of them failed
+#     (job isolation -- a TESS hiccup must not block Kepler's model).
+#
+# All generated data and model files live in a SEPARATE repository,
+# AJpro-merc/exocomet-hunter-data, not this repo's git history (explicit user
+# choice this session) -- cloned into ./data-repo/ using the DATA_REPO_TOKEN
+# secret, which a human has to create and add themselves (Settings > Secrets
+# and variables > Actions on THIS repo); entering that token anywhere is not
+# something this session's assistant does on the user's behalf. Until that
+# secret exists, the push-to-data-repo steps fail loudly, which is correct.
+#
+# Free for public repositories. Each generation run is capped to a 30-minute
+# internal budget via --time-budget-minutes, plus --max-hosts/--max-new-rows
+# as an independent bound (Next Steps risk-mitigation: don't let one
+# unusually fast/slow cycle balloon). Light curves are streamed and discarded
+# (2026-09-14 discard_after_read fix).
+
+name: train
+
+on:
+  schedule:
+    - cron: "0 */2 * * *" # generation
+    - cron: "0 6 * * 1" # weekly retrain, Monday 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      time_budget_minutes:
+        description: "Minutes to spend generating before stopping"
+        required: false
+        default: "30"
+      run_train:
+        description: "Also run the weekly retrain job"
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: train
+  cancel-in-progress: false
+
+env:
+  DATA_REPO: AJpro-merc/exocomet-hunter-data
+
+jobs:
+  kepler:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '0 */2 * * *' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Clone data repo
+        run: |
+          git clone "https://x-access-token:${{ secrets.DATA_REPO_TOKEN }}@github.com/${DATA_REPO}.git" data-repo
+      - name: Generate Kepler training rows
+        run: |
+          python scripts/generate_training_labels.py \
+            --mission Kepler \
+            --out data-repo/training/labels_kepler.parquet \
+            --time-budget-minutes "${{ github.event.inputs.time_budget_minutes || 30 }}" \
+            --max-new-rows 400 \
+            --bootstrap-draws 300
+      - name: Test
+        run: pytest tests/unit -q
+      - name: Commit results to data repo
+        run: |
+          cd data-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f training/labels_kepler.parquet
+          if git diff --staged --quiet; then
+            echo "No new rows this run."
+          else
+            git commit -m "kepler: automated run $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git pull --rebase --autostash
+            git push
+          fi
+
+  tess:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '0 */2 * * *' }}
+    needs: kepler # sequenced, not parallel -- both push to the same data repo
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Clone data repo
+        run: |
+          git clone "https://x-access-token:${{ secrets.DATA_REPO_TOKEN }}@github.com/${DATA_REPO}.git" data-repo
+      - name: Generate TESS training rows
+        run: |
+          python scripts/generate_training_labels.py \
+            --mission TESS \
+            --host-list config/tess_training_hosts.txt \
+            --out data-repo/training/labels_tess.parquet \
+            --time-budget-minutes "${{ github.event.inputs.time_budget_minutes || 30 }}" \
+            --max-new-rows 400 \
+            --bootstrap-draws 300
+      - name: Test
+        run: pytest tests/unit -q
+      - name: Commit results to data repo
+        run: |
+          cd data-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f training/labels_tess.parquet
+          if git diff --staged --quiet; then
+            echo "No new rows this run."
+          else
+            git commit -m "tess: automated run $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git pull --rebase --autostash
+            git push
+          fi
+
+  train:
+    if: always() && (github.event_name == 'workflow_dispatch' && github.event.inputs.run_train != 'false' || github.event.schedule == '0 6 * * 1')
+    needs: [kepler, tess]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Clone data repo
+        run: |
+          git clone "https://x-access-token:${{ secrets.DATA_REPO_TOKEN }}@github.com/${DATA_REPO}.git" data-repo
+      - name: Test
+        run: pytest tests/unit -q
+
+      - name: Train Kepler model (skip if data unchanged since last run)
+        run: |
+          set -e
+          PARQUET=data-repo/training/labels_kepler.parquet
+          HASH_FILE=data-repo/models/.last_trained_hash_kepler
+          if [ -f "$PARQUET" ]; then
+            NEW_HASH=$(sha256sum "$PARQUET" | cut -d' ' -f1)
+            OLD_HASH=$(cat "$HASH_FILE" 2>/dev/null || echo "")
+            if [ "$NEW_HASH" = "$OLD_HASH" ] && [ -n "$OLD_HASH" ]; then
+              echo "Kepler training data unchanged since last run -- skipping refit."
+            else
+              python scripts/train_classifier.py \
+                --in "$PARQUET" \
+                --out-model data-repo/models/kepler.joblib \
+                --manifest-out data-repo/models/manifest_kepler.jsonl \
+                --threshold-out data-repo/models/threshold_kepler.json \
+                --last-compare-out data-repo/models/last_compare_kepler.json \
+                --mission kepler
+              mkdir -p "$(dirname "$HASH_FILE")"
+              echo "$NEW_HASH" > "$HASH_FILE"
+            fi
+          else
+            echo "No Kepler training data yet -- skipping."
+          fi
+
+      - name: Train TESS model (skip if data unchanged since last run)
+        run: |
+          set -e
+          PARQUET=data-repo/training/labels_tess.parquet
+          HASH_FILE=data-repo/models/.last_trained_hash_tess
+          if [ -f "$PARQUET" ]; then
+            NEW_HASH=$(sha256sum "$PARQUET" | cut -d' ' -f1)
+            OLD_HASH=$(cat "$HASH_FILE" 2>/dev/null || echo "")
+            if [ "$NEW_HASH" = "$OLD_HASH" ] && [ -n "$OLD_HASH" ]; then
+              echo "TESS training data unchanged since last run -- skipping refit."
+            else
+              python scripts/train_classifier.py \
+                --in "$PARQUET" \
+                --out-model data-repo/models/tess.joblib \
+                --manifest-out data-repo/models/manifest_tess.jsonl \
+                --threshold-out data-repo/models/threshold_tess.json \
+                --last-compare-out data-repo/models/last_compare_tess.json \
+                --mission tess
+              mkdir -p "$(dirname "$HASH_FILE")"
+              echo "$NEW_HASH" > "$HASH_FILE"
+            fi
+          else
+            echo "No TESS training data yet -- skipping."
+          fi
+
+      - name: Commit models to data repo
+        run: |
+          cd data-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f models/
+          if git diff --staged --quiet; then
+            echo "No model changes this run."
+          else
+            git commit -m "train: automated weekly retrain $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git pull --rebase --autostash
+            git push
+          fi

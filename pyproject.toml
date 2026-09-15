@@ -1,0 +1,153 @@
+[build-system]
+requires = ["setuptools>=68", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "exocomet-hunter"
+dynamic = ["version"]
+description = "A framework for detecting asymmetric, comet-like transit events in Kepler and TESS light curves."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Atharva Joshi" }]
+keywords = [
+    "astronomy",
+    "exocomets",
+    "light-curves",
+    "kepler",
+    "tess",
+    "transit-detection",
+    "time-series",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Typing :: Typed",
+]
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "pandas>=2.1",
+    "pyarrow>=14.0",
+    "matplotlib>=3.8",
+    "astropy>=5.3",
+    "lightkurve>=2.4",
+    "astroquery>=0.4.7",
+    "scikit-learn>=1.4",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "pytest-benchmark>=4.0",
+    "hypothesis>=6.90",
+    "mypy>=1.8",
+    "ruff>=0.3",
+    "black>=24.1",
+    "pre-commit>=3.6",
+    "pandas-stubs",
+    "types-PyYAML",
+]
+docs = [
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.24",
+]
+
+[project.urls]
+Homepage = "https://github.com/atharvajoshi/exocomet-hunter"
+Documentation = "https://atharvajoshi.github.io/exocomet-hunter"
+Repository = "https://github.com/atharvajoshi/exocomet-hunter"
+Issues = "https://github.com/atharvajoshi/exocomet-hunter/issues"
+
+[project.scripts]
+exocomet = "exocomet.cli:main"
+
+[tool.setuptools_scm]
+fallback_version = "0.1.0.dev0"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+exocomet = ["py.typed"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "D",    # pydocstyle
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "NPY",  # numpy-specific rules
+    "RUF",
+]
+ignore = [
+    "D105",  # magic method docstrings
+    "D107",  # __init__ docstring (documented at class level)
+    "N803",  # allow uppercase argument names (A_dur etc. match the paper's notation)
+    "N806",  # allow uppercase locals for the same reason
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D100", "D101", "D102", "D103", "D104"]
+"scripts/*" = ["D100", "D103"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+show_error_codes = true
+files = ["src/exocomet"]
+
+[[tool.mypy.overrides]]
+module = [
+    "lightkurve.*",
+    "astroquery.*",
+    "astropy.*",
+    "scipy.*",
+    "matplotlib.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "network: test requires outbound network access to MAST/CDS (deselect with '-m \"not network\"')",
+    "slow: test takes more than a few seconds",
+]
+
+[tool.coverage.run]
+source = ["src/exocomet"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "@abstractmethod",
+]

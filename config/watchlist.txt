@@ -1,0 +1,28 @@
+# Targets monitored for new observations by scripts/monitor_new_data.py.
+#
+# Starting list: bright, well-studied stars with debris discs or published
+# exocomet activity. These are chosen because infalling-comet activity is
+# already established or plausible for them, not at random -- a search is more
+# defensible when the target selection has a stated astrophysical reason.
+#
+# This is a seed list, to be replaced by a catalogue-driven selection
+# (scripts/build_target_list.py, cross-matching debris-disc catalogues against
+# the TESS Input Catalog) once that is written.
+#
+# One target per line. Blank lines and '#' comments ignored.
+
+# --- Canonical exocomet system: infalling evaporating bodies seen for decades
+beta Pic
+
+# --- Young star with unusually variable, dusty obscuration events
+RZ Psc
+
+# --- Bright, well-characterised debris discs
+HD 172555
+49 Ceti
+HR 4796
+Fomalhaut
+Vega
+AU Mic
+HD 181327
+eta Crv
