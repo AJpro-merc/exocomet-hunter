@@ -23,6 +23,10 @@ verified end-to-end — see "FIRST THING NEXT SESSION" below. Full narrative:
 
 ## ⚠️ FIRST THING NEXT SESSION (2026-09-15)
 
+0. ~~Push the squashed `exocomet-hunter` git history~~ — **done**, later the same
+   2026-09-14 session, once the user approved the harness's permission prompt. Verify:
+   `origin/main` is at `044ad99` (or later). Both repos' history is clean, single-commit
+   origin, no Claude attribution anywhere except one README credit line.
 1. **Verify `scripts/train_classifier.py`'s real-data backtest actually completes.**
    It hung with zero CPU progress for 9+ minutes fetching KIC 3542116 near the end of
    the 2026-09-14 session and had to be killed; a direct retry of the same
