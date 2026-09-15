@@ -355,14 +355,106 @@ false-alarm rate from time-reversed and control light curves and report it with 
   evidence for, evidence against, alternative explanations, recommended next test, and must
   be allowed to answer `insufficient_evidence`. Use it as a skeptic, not a cheerleader.
 - **H2. Website / dashboard.** Atharva said later.
-- **H3. Claude Cloud routine.** Prompt ready in `docs/cloud-routine-prompt.md`. Create it in
-  Claude → Routines → New routine → Cloud → repo `AJpro-merc/exocomet-hunter` → daily.
-  Only after A1–A4 are fixed.
+- **H3. Claude Cloud routine — search survey itself: still blocked, now for a proven reason.**
+  Confirmed 2026-09-14: Cloud routines cannot reach `mast.stsci.edu` at all (a platform-level
+  egress policy, not a config gap — checked every available setting). This isn't just
+  "wait for A1–A4," it's "can never run the *search* itself on this platform." The daily
+  survey automation has to stay on GitHub Actions (`.github/workflows/survey.yml`,
+  currently disabled pending A4) or an equivalent with real network access. A
+  **reporting-only** Cloud routine (reads results, summarizes, never fetches from MAST)
+  remains viable and is built — see the training-pipeline routine 3 in
+  `docs/cloud-routine-prompt-training.md`, Session Log 2026-09-14 §12.
 - **H4. Project 2 — technosignature / anomalous dimming.** New `Detector` subclass
   (Isolation Forest on light-curve features), validated on Boyajian's Star (KIC 8462852),
   reusing `io/`, `detrend/`, `core/`, `vetting/`.
 - **H5. Learning pass.** Atharva chose build-first. Still owed: a plain-language walkthrough
   of every module so he can explain every choice himself.
+
+---
+
+## PART I — Future roadmap (from external review, 2026-09-14) 🟢
+
+Atharva brought a detailed outside critique of the whole project mid-session (2026-09-14).
+Its own framing was explicit: don't build all of it at once — most of it is genuine
+long-term direction, not a same-session task list. The cheap, concrete risk-mitigation
+half of it (idempotent generation, per-cycle work caps, a written holdout protocol,
+dedup/sanity checks, A2 provenance columns, a saved threshold artifact, skip-if-unchanged
+retraining, job isolation) was already folded straight into the actual build that session
+— see Session Log 2026-09-14 §7/§9. What follows is the bigger-picture half, condensed
+into my own words so the thinking survives without pretending any of it is built.
+
+**The core idea underneath everything below**: a detector alone just produces a list of
+candidates. What makes a search *defensible* is everything that happens after — attacking
+each candidate with every test that could disprove it, comparing against a physically
+realistic simulation instead of an arbitrary injected shape, checking two independent
+methods agree, and having a human (or a disciplined AI skeptic, never a cheerleader) review
+what's left. The review's own summary line: "detect → quantify → attack the candidate →
+test against simulations → independently validate → explain uncertainty → human review →
+learn from the result." The continuous-training infrastructure built 2026-09-14 already
+gives this loop somewhere to run; none of the loop itself exists yet.
+
+Roughly in the reviewer's own priority order, each one line:
+
+- **A physical exocomet simulator** (nucleus/tail geometry, optical depth, orbital
+  velocity, limb darkening → simulated light curve) to replace the current arbitrary
+  piecewise-linear injected shapes — the single highest-leverage improvement to training
+  data quality, bigger than any amount of additional compute (echoes F2, already in
+  Next Steps, now with a concrete case for why it matters most).
+- **A falsification engine**: every candidate automatically run through a battery of
+  tests designed to disprove it (eclipsing-binary check, flare morphology, starspot fit,
+  instrumental-artefact check, sector-edge proximity, periodicity, detrending-method
+  sensitivity, cross-sector persistence) and reported as PASS/FAIL per test rather than a
+  single confidence number — "strong ingress/egress asymmetry" is a different, more
+  defensible claim than "COMET!!!" (overlaps heavily with D1/D2, already planned, framed
+  here as an automatic pass/fail battery rather than a single vetting pipeline).
+- **A full injection-recovery sensitivity map**: detection probability as a function of
+  depth, duration, τ/σ, stellar magnitude, noise, cadence, impact parameter, tail
+  orientation — not just the single depth-only completeness curve currently measured.
+  Lets the project say "80% complete above X ppm under these conditions" instead of a
+  bare accuracy number.
+- **A blind test set**, formally separated and frozen (matches D3's blind-search protocol,
+  already planned): tune only on development data, freeze the configuration, then run on
+  search targets without further changes — prevents unconsciously tuning until the known
+  examples get found.
+- **A detrending ensemble**: run 2-3 different detrending methods and only trust a
+  candidate that survives all of them — protects against a signal being an artefact of
+  the preprocessing choice, not the star.
+- **A second, independent detector** (e.g. template matching / matched filtering against
+  a bank of comet profiles) so two different algorithms have to agree — disagreement
+  becomes a signal worth flagging, not noise to average away (already F3, reframed here
+  as a cross-check specifically for candidate confidence, not just a validation exercise).
+- **A one-click "case file" per high-ranking candidate**: every plot, every test result,
+  full provenance (data hash, code version, config, seed) bundled so a result can be
+  independently reproduced with one command, not just read about.
+- **An AI skeptic, with hard guardrails, reviewing candidates** — closely related to the
+  already-planned H1, but sharper on the guardrails: it may summarize, critique, propose
+  alternative explanations, and suggest next tests; it may never alter a measurement,
+  compute an authoritative statistic, silently change a label, or claim a discovery. The
+  review's own suggestion worth keeping: prompt it to *disprove* the candidate, not
+  confirm it — a more scientifically honest framing than "is this a comet?"
+- **An "unknown-unknown" detector**: after the known categories (comet / lookalike /
+  noise) are all accounted for, whatever's left over gets its own anomaly-detection pass
+  instead of being forced into an existing bucket — this is the natural bridge to H4
+  (the technosignature/anomalous-dimming project), not a separate idea.
+- **Active learning**: once real review happens, spend human attention on the model's
+  *most uncertain* predictions first, not a random sample — pairs naturally with the
+  continuous-training loop already built.
+- **A human-in-the-loop review console**: a small local UI to page through candidates
+  (light curve, detrended view, AI review, test results) and record a verdict — every
+  recorded verdict becomes more training/evaluation data.
+- **Cross-mission and cross-sector confirmation**: a Kepler candidate checked against
+  TESS/K2 observations of the same star; a TESS candidate checked across every sector
+  that star was observed in, to separate a one-off transient from a repeating stellar
+  phenomenon.
+- **Population-level science**, once there's a real candidate list: candidate rate for
+  debris-disc stars vs. a matched control group, corrected for measured detection
+  efficiency — this is F4, already planned, and the part of the project most likely to
+  produce an actual citable result rather than just a working tool.
+
+Deliberately not summarized here as near-term: model interpretability displays, ranking
+candidates by "information value" rather than raw score, "what should we observe next"
+recommendations, adversarial synthetic stress-tests, a plugin architecture generalizing
+the whole thing beyond exocomets — all genuine, all further out than everything above.
 
 ---
 
