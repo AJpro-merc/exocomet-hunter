@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Typed configuration for the pipeline.
 
 Defaults here mirror ``config/thresholds.yaml`` so that an installed copy of the
@@ -94,6 +97,16 @@ class ScoringConfig:
     bootstrap_draws: int = 1000
     significance_threshold: float = 3.0
     require_sign_agreement: bool = True
+    #: Model-comparison evidence required to call an event comet-shaped. This
+    #: and ``tau_over_sigma_threshold`` are the flagging decision; the
+    #: contour-based significance is reported but no longer decides, because
+    #: ``A_dur`` measured at half depth can carry the wrong sign (see
+    #: docs/research_log/003-half-depth-contour-sign-error.md).
+    delta_bic_threshold: float = 10.0
+    #: Fitted egress-to-ingress timescale ratio required for a trailing tail.
+    #: Above 1 the obscuration clears more slowly than it accumulated, which is
+    #: the physical signature of a comet; a reversed dip falls below 1.
+    tau_over_sigma_threshold: float = 1.0
     periodicity_min_period_days: float = 0.5
     periodicity_max_period_days: float = 50.0
     periodicity_fap_threshold: float = 0.01

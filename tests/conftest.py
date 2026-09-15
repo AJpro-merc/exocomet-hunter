@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Synthetic light curves with known ground truth.
 
 Every correctness claim about the detector is checked here first, on data whose

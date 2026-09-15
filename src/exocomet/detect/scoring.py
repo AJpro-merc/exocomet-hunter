@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Significance estimation for measured events.
 
 An asymmetry value on its own means little: a shallow dip in noisy photometry can
@@ -126,8 +129,13 @@ def score_event(
     Returns
     -------
     EventScore
-        ``flagged`` is ``True`` only when the asymmetry exceeds the significance
-        threshold and (when configured) the two metrics agree in sign.
+        ``flagged`` is ``True`` only when the profile fit both prefers the comet
+        model (``delta_bic`` above ``cfg.delta_bic_threshold``) and recovers a
+        trailing tail (``tau_over_sigma`` above ``cfg.tau_over_sigma_threshold``).
+        The contour-based ``significance`` and ``signs_agree`` are still
+        reported, but no longer decide: ``|A_dur|`` is sign-blind, and at the
+        half-depth contour ``A_dur`` can itself carry the wrong sign, so the old
+        rule flagged reversed (slow-in, fast-out) dips as candidates.
     """
     cfg = config or ScoringConfig()
     generator = rng if rng is not None else np.random.default_rng()
@@ -135,14 +143,35 @@ def score_event(
     baseline_level = float(
         np.median(baseline[event.window.start_index : event.window.end_index + 1])
     )
-    model = compare_models(lc.time, lc.flux, lc.flux_err, event, baseline_level)
+    model = compare_models(
+        lc.time,
+        lc.flux,
+        lc.flux_err,
+        event,
+        baseline_level,
+        delta_bic_threshold=cfg.delta_bic_threshold,
+    )
+
+    # The flagging decision rests on the fitted profile alone. Both statistics
+    # are NaN when the fit is missing or degenerate, and NaN comparisons are
+    # False, so an unfittable event fails closed.
+    delta_bic = model.delta_bic if model is not None else float("nan")
+    tau_over_sigma = model.tau_over_sigma if model is not None else float("nan")
+    flagged = bool(
+        np.isfinite(delta_bic)
+        and np.isfinite(tau_over_sigma)
+        and delta_bic > cfg.delta_bic_threshold
+        and tau_over_sigma > cfg.tau_over_sigma_threshold
+    )
 
     if event.asymmetry is None:
+        # A decisive model fit still counts: the contour asymmetry being
+        # unmeasurable says nothing about the shape the profile fit recovered.
         return EventScore(
             a_dur_sigma=float("nan"),
             significance=0.0,
             signs_agree=False,
-            flagged=False,
+            flagged=flagged,
             periodic=periodic,
             period_days=period_days,
             model=model,
@@ -168,16 +197,14 @@ def score_event(
     else:
         significance = abs(a_dur) / sigma
 
+    # Reported, not decisive: see the flagging rule above.
     signs_agree = event.asymmetry.signs_agree
-    flagged = significance >= cfg.significance_threshold
-    if cfg.require_sign_agreement:
-        flagged = flagged and signs_agree
 
     return EventScore(
         a_dur_sigma=sigma,
         significance=significance,
         signs_agree=signs_agree,
-        flagged=bool(flagged),
+        flagged=flagged,
         periodic=periodic,
         period_days=period_days,
         model=model,

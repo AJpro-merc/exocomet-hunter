@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Removal of instrumental and stellar trends ahead of detection.
 
 Spacecraft photometry drifts: thermal settling after a safe-mode recovery, focus

@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Injection and recovery: measuring what the pipeline can actually find.
 
 A detection count on its own is close to meaningless. "I found three events" only

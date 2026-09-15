@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Build a small list of quiet Kepler long-cadence host stars for C1 training.
 
 Real light curves are used as injection hosts (rather than synthetic flat

@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Model comparison: does the BIC actually prefer the right profile?
 
 This is the metric the exocomet literature ranks on, so these tests matter more

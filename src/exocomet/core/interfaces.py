@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Plugin interfaces that define the shape of the pipeline.
 
 The pipeline is deliberately written against these abstractions rather than

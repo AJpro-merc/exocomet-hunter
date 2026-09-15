@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """The core correctness tests: does the asymmetry measurement mean what we claim?
 
 A piecewise-linear injected dip has an analytic answer — the measured duration

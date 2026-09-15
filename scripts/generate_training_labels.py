@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """C1: build the classifier's labelled training set (see Next Steps Part C1).
 
 For each host star: download, then for each label class inject a synthetic

@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Atharva Joshi
+# SPDX-License-Identifier: BSD-3-Clause
+
 """Candidate event detection: what counts as an event, and what must not."""
 
 from __future__ import annotations
