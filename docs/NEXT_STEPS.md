@@ -1,7 +1,8 @@
 # Next Steps
 
 Every known task, in order, with enough detail to start without re-deriving anything.
-Identical copy kept in `docs/NEXT_STEPS.md`. Last updated 2026-09-14 (evening).
+Identical copy kept in `docs/NEXT_STEPS.md`. Last updated 2026-09-15 (early
+morning — session ran past midnight).
 
 Status key: 🔴 blocks trustworthy results · 🟠 important · 🟢 later / polish
 
@@ -9,41 +10,50 @@ Status key: 🔴 blocks trustworthy results · 🟠 important · 🟢 later / po
 
 ## Plain-language summary
 
-The detector works on Kepler data. A1 is fixed (window sizes now scale to TESS's faster
-cadence) but A2 and A4 are still open, so TESS still can't be trusted. Meanwhile, C1
-(building the classifier's training data via fake injected comets on real Kepler stars)
-is underway, both locally and via two recurring Claude Cloud routines — see the C1
-status note below. The big remaining job is still the **classifier**: the program is
-good at *spotting* dips but bad at *judging* whether they are comet-shaped.
+The detector now works correctly on **both** Kepler and TESS data — A1 and A2 are both
+fixed and verified against real data. A4 is still open. C1 (the classifier's labelled
+training data) and C2 (a real training script) are both built; the recurring generation
+and training pipeline runs on GitHub Actions, not Claude Cloud routines (those cannot
+reach NASA's archive at all — a platform limit, confirmed and documented). One real step
+(the trained model's live backtest against KIC 3542116) is implemented but not yet
+verified end-to-end — see "FIRST THING NEXT SESSION" below. Full narrative:
+[[Session Log 2026-09-14]].
 
 ---
 
-## Session update — 2026-09-14 (evening)
+## ⚠️ FIRST THING NEXT SESSION (2026-09-15)
 
-- **A1 done and verified.** Windows are now in days, converted to cadences at runtime
-  from each light curve's own measured spacing. 48/48 unit tests pass; a real re-run on
-  KIC 3542116 reproduces the exact same 7 events at the same epochs (confirmed no-op on
-  Kepler). Committed: `97e2fc1`.
-- **Daily survey workflow disabled** (A3 resolved: chose option (a)). Checked first —
-  no bad runs had happened; the only run ever was the manual dry run from 2026-09-13.
-  Nothing needed quarantining.
-- **C1 (labelled training set) underway**, Kepler-only, deliberately ahead of A2/A4 since
-  it doesn't touch TESS: `scripts/build_kepler_host_list.py` (24 quiet Kepler hosts,
-  excludes the two validation stars) and `scripts/generate_training_labels.py` (inject
-  comet/symmetric/reversed/noise/time_reversed_real, run the detector, save 19 features +
-  label to parquet, discard the raw light curve). Committed: `461908a`.
-- **Two recurring Claude Cloud routines set up** (see
-  `docs/cloud-routine-prompt-training.md` in the repo for the exact paste-in text):
-  Kepler track (safe) and a TESS track explicitly marked **provisional** pending A2/A4.
-  Both run every 2 hours, capped to a 30-minute budget per run, append (not overwrite) to
-  `results/training/labels_kepler.parquet` / `labels_tess_provisional.parquet`.
-  **Known open issue on the TESS routine:** its host list currently reuses
-  `config/watchlist.txt` — stars with *real, plausible* exocomet activity (beta Pic
-  etc.), which is the wrong choice for `noise`/`time_reversed_real` injection hosts (risk
-  of mislabelling a genuine event as noise). Needs a genuinely quiet TESS host list before
-  that routine's negative-class rows are trusted.
-- A2, A4 remain open 🔴 — untouched this session, by explicit choice (training proceeds
-  Kepler-only in the meantime).
+1. **Verify `scripts/train_classifier.py`'s real-data backtest actually completes.**
+   It hung with zero CPU progress for 9+ minutes fetching KIC 3542116 near the end of
+   the 2026-09-14 session and had to be killed; a direct retry of the same
+   `fetch_light_curve` call also hung and was interrupted before diagnosis finished.
+   Every other MAST fetch that session succeeded, including an earlier one for this
+   same star — so this is most likely transient, but **unconfirmed**. Run it for real,
+   watched, before trusting this script in production:
+   ```bash
+   cd "exocomet-hunter" && source .venv/bin/activate
+   time python3 -c "
+   from exocomet.io.download import fetch_light_curve
+   lc = fetch_light_curve('KIC 3542116', mission='Kepler', discard_after_read=True)
+   print('ok', lc.n_points)
+   "
+   ```
+   If it hangs again, that's a real bug (network timeout missing somewhere in
+   `io/download.py`/`lightkurve`) worth root-causing, not retrying blind.
+2. **Set up `DATA_REPO_TOKEN`** (the user's own step, not mine to do): a fine-grained
+   GitHub PAT scoped to `AJpro-merc/exocomet-hunter-data` only, `Contents: Read and
+   write`, added as a repo secret on `AJpro-merc/exocomet-hunter` (Settings → Secrets
+   and variables → Actions). Until this exists, `train.yml`'s push-to-data-repo steps
+   fail loudly (expected, not a bug).
+3. Once both of those are done, **trigger `train.yml` for real** (`gh workflow run
+   train.yml`) and watch a complete run — generation, test, commit to the data repo,
+   and (if `run_train` weekly-equivalent input is set) a real training run — end to end
+   for the first time.
+4. **Create Cloud routine 3** (`Exocomet training summary`, reporting-only — text is
+   ready in `docs/cloud-routine-prompt-training.md`). Routines 1/2 are dead; don't
+   recreate them.
+5. Copyright headers across public-facing files — Atharva asked for this, explicitly
+   deferred to a later session (not started).
 
 ---
 
@@ -67,7 +77,7 @@ good at *spotting* dips but bad at *judging* whether they are comet-shaped.
 - **Test to add:** inject the same comet into a 120 s light curve and a 1800 s light curve
   covering the same time span; detection, epoch, and τ/σ must agree within tolerance.
 
-### A2. TESS products from different pipelines get stitched together 🔴
+### A2. TESS products from different pipelines get stitched together ✅ done 2026-09-14
 - **Problem:** `lk.search_lightcurve("beta Pic", mission="TESS")` returned 54 products from
   QLP, SPOC, TARS, TASOC, TESS-SPOC and TGLC, at 20 s to 1800 s. `fetch_light_curve` calls
   `download_all().stitch()` on all of them. Overlapping timestamps are then silently
@@ -80,16 +90,22 @@ good at *spotting* dips but bad at *judging* whether they are comet-shaped.
   4. Log (don't silently drop) how many duplicate timestamps were removed.
 - **Also fix `scripts/monitor_new_data.py`:** its change detector counts *all* products,
   so a new QLP file triggers reprocessing. Count only the author/exptime actually used.
-- **New evidence, 2026-09-14 (TESS training-routine smoke test):** a real run against 10
-  watchlist stars produced **zero** usable rows. `lightkurve` warned of "zero-centered"
-  flux (median near 0 ppm, not a large positive count) before `stitch()`/`normalize()` --
-  at least one HLSP pipeline (TARS; the same one that also failed to download for 49 Ceti
-  with a "file may be corrupt" error) reports flux as an already-normalized residual, not
-  raw counts. `_to_light_curve_data`'s unconditional `flux / median(flux)` can corrupt the
-  scale outright when such a product gets stitched in, not merely misalign cadences. The
-  fix needs to exclude these products entirely (not just separate by cadence/author) —
-  worth checking whether pinning `author="SPOC"` alone already avoids TARS, or whether an
-  explicit exclusion list is needed.
+- **Fixed for real, 2026-09-14 (later the same session).** `fetch_light_curve` /
+  `iter_light_curves` / `MastLightCurveSource` gained `author`/`exptime` params,
+  defaulting to `author="SPOC"`, `exptime=120` for TESS and `author="Kepler"` for
+  Kepler. Pinning to a single pipeline turned out to fix *both* problems at once — the
+  originally-named cadence mixing, and a second, worse one found the same session: the
+  TARS pipeline (the one that also failed to download for 49 Ceti with a "file may be
+  corrupt" error) reports flux as an already zero-centered residual, not raw counts, so
+  stitching it in could divide by a near-zero median and corrupt the normalisation
+  outright — pinning to SPOC excludes it entirely rather than just separating by
+  cadence. Verified against real data: beta Pic now resolves to 10 clean SPOC/120s
+  products (down from 54 mixed-pipeline products), flux normalises to a sane 0.99-1.01
+  range, author/exptime/sectors are recorded in `lc.meta` and in every generated
+  training row. `monitor_new_data.py`'s change detector fixed the same way. New test:
+  `tests/unit/test_cross_cadence.py` (synthetic, no network) confirms the same injected
+  comet is recovered at matching epoch/τσ at both 120s and 1800s cadence. Committed:
+  `52ac2ec`.
 
 > **Resolved 2026-09-14.** Checked first, before disabling anything: only one run had
 > ever happened (`34776888883`, the manual dry run from 2026-09-13) — the 05:00 UTC
@@ -181,42 +197,51 @@ good at *spotting* dips but bad at *judging* whether they are comet-shaped.
 The main next build. Goal: replace the hand-set flag rule with a model trained on labelled
 examples, and **measure** how good it is.
 
-### C1. Labelled training set — `src/exocomet/calibration/labels.py`
+### C1. Labelled training set ✅ built 2026-09-14 — `scripts/generate_training_labels.py`
 - **Where labels come from:** injection. We fake events of known type, so the label is known.
-- **Host light curves** (what fakes get injected into):
-  - ~300 real, quiet Kepler long-cadence stars (no known planets, no known variability).
-    Build list from NASA Exoplanet Archive exclusions + SIMBAD non-variables.
-  - Later: TESS SPOC 120 s hosts (only after A1/A2).
-  - Keep the synthetic flat-noise generator for unit tests only.
-- **Classes to inject:**
+- **Host light curves:** `scripts/build_kepler_host_list.py` (hand-curated ~23 Kepler
+  hosts; NASA Exoplanet Archive auto-expansion still **not built** — see risk-mitigation
+  note in Session Log 2026-09-14 for why this matters, and `scripts/vet_host_list.py`
+  for the empirical alternative built instead: run the real pipeline, no injection, flag
+  anything suspiciously deep/frequent). TESS hosts still reuse `config/watchlist.txt`
+  (wrong list for `noise`-class purposes — flagged, not fixed).
+- **Classes implemented (7, not the original 5):** `comet`, `symmetric`, `reversed`,
+  `flare`, `starspot` (the last two added 2026-09-14, Next Steps D1 lookalikes),
+  `noise`, `time_reversed_real`. Depth/amplitude sampling is weighted toward 500-2000ppm
+  (the genuinely uncertain detection region), not uniform.
+- **Output:** one row per detected event: 19 features + `label`, `host_star`,
+  `injected_depth`, `injected_tau_over_sigma`, `seed`, `author`, `exptime`. Real output
+  now lives in the separate `AJpro-merc/exocomet-hunter-data` repo (not this repo's git
+  history, not `data/training/` — that path is still used for local/manual runs only).
+- **Real bug found and fixed 2026-09-14:** the generator never detrended before running
+  the detector — every row from before that fix (including the first 191-row local run)
+  ran on raw, undetrended flux. Nothing had been committed anywhere trustworthy yet, so
+  nothing needed cleanup, but see Session Log for the full story.
+- **Recurring generation:** `.github/workflows/train.yml`, GitHub Actions, every 2h —
+  NOT Claude Cloud routines (confirmed platform-level dead end, see H3 below).
 
-| Label | How to make it | Parameter ranges |
-|---|---|---|
-| `comet` (positive) | Gaussian ingress + exponential egress, `comet_profile` | depth 200–3000 ppm, σ 1–10 h, τ/σ 1.2–5 |
-| `symmetric` | Gaussian or trapezoid dip | depth 200–3000 ppm, width 1–24 h |
-| `reversed` | exponential ingress + Gaussian egress | same ranges, mirrored |
-| `noise` | no injection; take detections that occur anyway | — |
-| `time_reversed_real` | flip a real light curve in time | preserves real systematics, flips comet direction |
-
-- **Output:** one row per detected event: 19 features from `calibration/features.py`,
-  plus `label`, `host_star`, `injected_depth`, `injected_tau_over_sigma`, `seed`.
-  Save as `data/training/labels_v1.parquet` (gitignored; regenerable from seed).
-- **Size:** start with ~10,000 events. Injections take ~87 ms each (measured), so this is
-  about 15 minutes on one core.
-
-### C2. Train — `src/exocomet/calibration/classifier.py`
-- **Model:** `sklearn.ensemble.RandomForestClassifier` first (sklearn 1.9.1 is installed).
-  Compare against `HistGradientBoostingClassifier` and logistic regression.
-- **Missing values:** features are `nan` when unmeasurable. HistGradientBoosting handles nan
-  natively; for Random Forest add a `SimpleImputer` plus an `is_measurable` indicator.
-- **Split by host star, not by row** (`GroupKFold` on `host_star`). Otherwise the same
-  star's noise appears in both train and test and the score is inflated.
+### C2. Train — ✅ built 2026-09-14, ⚠️ not fully verified — `scripts/train_classifier.py`
+- **Model:** `RandomForestClassifier` wrapped in `CalibratedClassifierCV` (isotonic).
+  `HistGradientBoostingClassifier`/logistic-regression comparison not built — C2 always
+  called this a "first" model, still true.
+- **Missing values:** `SimpleImputer` (median) + an `is_measurable` indicator per feature,
+  as specified.
+- **Split by host star:** `GroupKFold` on `host_star`, as specified.
 - **Class imbalance:** `class_weight="balanced"`.
-- **Calibrated probabilities:** wrap in `CalibratedClassifierCV` so 0.9 means ~90%.
-- **Hold out completely:** KIC 3542116 and KIC 11084727. Never inject into them, never
-  train on them. They are the final exam.
-- **Save:** `joblib` file containing model, `FEATURE_NAMES`, package version, training-set
-  hash, and date. Refuse to load if feature names differ.
+- **Calibrated probabilities:** `CalibratedClassifierCV`, as specified. Binary target
+  (`comet` vs. everything else), not the original 5-class framing — matches C4's
+  eventual `comet_probability` output directly.
+- **Hold out completely:** hard `assert`/exception (`HoldOutError`) if KIC 3542116 or KIC
+  11084727 ever appear in the training data, not just a warning.
+- **Save:** `joblib` file with model + `FEATURE_NAMES` + threshold. Provenance manifest
+  (`models/manifest_<mission>.jsonl`, append-only) has row count, class counts, host
+  stars, date, package versions, training-set hash — the "how much has it trained on"
+  record, plus both backtests (see C3 below).
+- **⚠️ Not fully verified:** the real-data-backtest step (fetches KIC 3542116 live) hung
+  for 9+ minutes with zero CPU progress in testing and was killed before a full run ever
+  completed. Every other piece of this script (loading, hold-out check, training,
+  completeness calc, manifest/threshold writing) ran and was inspected; this one network
+  step needs a real watched run before trusting it. **First thing next session.**
 
 ### C3. Evaluate — must produce these numbers
 - ROC-AUC and precision-recall AUC (PR matters more; comets are rare).
