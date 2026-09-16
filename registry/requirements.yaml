@@ -1,0 +1,111 @@
+# Machine-readable mirror of 44_requirements_specification.md.
+# Generated: 2026-09-16, against commit 01c2051 (plus noted uncommitted working-tree state).
+
+- id: REQ-VALID-001
+  text: >
+    Must never train, inject into, or otherwise use KIC 3542116 or KIC 11084727
+    as a data source.
+  type: validity
+  implementation: scripts/build_kepler_host_list.py::EXCLUDED_HOLD_OUT_TARGETS
+  test: tests/unit/test_ingest.py
+  status: IMPLEMENTED, TESTED
+
+- id: REQ-VALID-002
+  text: "Known-bad hosts must be excluded from the training host list."
+  type: validity
+  implementation: scripts/build_kepler_host_list.py::KNOWN_BAD_HOSTS
+  test: null
+  status: IMPLEMENTED
+
+- id: REQ-VALID-003
+  text: "Detected candidates must never be reported as 'confirmed'."
+  type: validity
+  implementation: null
+  test: null
+  status: IMPLEMENTED (convention only, no runtime check)
+
+- id: REQ-VALID-004
+  text: "Validation epochs must come from the literature table, not prior detections."
+  type: validity
+  implementation: config/validation_targets.yaml
+  test: tests/integration/test_validation.py
+  status: IMPLEMENTED
+
+- id: REQ-FUNC-001
+  text: "Detrending window sizes must be specified in physical time (days), not cadence count."
+  type: functional
+  implementation: config/thresholds.yaml, src/exocomet/core/config.py
+  test: tests/unit/test_cross_cadence.py
+  status: IMPLEMENTED, TESTED
+
+- id: REQ-FUNC-002
+  text: "TESS retrieval must pin to a single author/exptime rather than stitching mixed pipelines."
+  type: functional
+  implementation: src/exocomet/io/download.py::fetch_light_curve
+  test: tests/unit/test_cross_cadence.py
+  status: IMPLEMENTED, TESTED
+
+- id: REQ-FUNC-003
+  text: >
+    An event is flagged only if delta_bic exceeds threshold AND tau_over_sigma
+    exceeds threshold.
+  type: functional
+  implementation: src/exocomet/detect/scoring.py::score_event
+  test: tests/unit/test_scoring.py
+  status: IMPLEMENTED, TESTED, VALIDATED
+
+- id: REQ-FUNC-004
+  text: "The ingestion pipeline must be resumable and never claim success for unlanded work."
+  type: functional
+  implementation: scripts/ingest.py::process_one_target
+  test: tests/unit/test_ingest.py, tests/unit/test_ledger.py
+  status: IMPLEMENTED, TESTED
+
+- id: REQ-FUNC-005
+  text: "A zero-candidate star must be recorded as a real, distinguishable non-detection."
+  type: functional
+  implementation: scripts/ingest.py::_write_results_jsonl
+  test: tests/unit/test_ingest.py
+  status: IMPLEMENTED, TESTED
+
+- id: REQ-FUNC-006
+  text: "exocomet --help must work with zero network access and zero heavy-import cost."
+  type: functional
+  implementation: src/exocomet/cli.py
+  test: tests/unit/test_cli.py
+  status: "IMPLEMENTED; zero-import-cost property specifically UNVERIFIED by test"
+
+- id: REQ-FUNC-007
+  text: "Injection classes must include physically motivated false-positive lookalikes."
+  type: functional
+  implementation: scripts/generate_training_labels.py, src/exocomet/calibration/injection.py
+  test: null
+  status: "IMPLEMENTED; TESTED - NO"
+
+- id: REQ-NFR-001
+  text: "A large batch search must not accumulate raw FITS files on disk."
+  type: non_functional
+  implementation: src/exocomet/io/download.py::_discard_cached, scripts/ingest.py
+  test: null
+  status: "IMPLEMENTED; previously broken and fixed once (see ERR-005)"
+
+- id: REQ-NFR-002
+  text: "Every MAST network call must have a bounded timeout and bounded retry count."
+  type: non_functional
+  implementation: src/exocomet/io/download.py::_call_with_timeout, _call_with_retries
+  test: tests/unit/test_download_timeout.py
+  status: IMPLEMENTED, TESTED, VALIDATED
+
+- id: REQ-NFR-003
+  text: "Package must import and CLI must run from pip install -e . alone, using built-in defaults."
+  type: non_functional
+  implementation: src/exocomet/core/config.py::PipelineConfig
+  test: null
+  status: "IMPLEMENTED; UNVERIFIED as an isolated-install end-to-end test"
+
+- id: REQ-NFR-004
+  text: "The data repository must only be written via the DATA_REPO_TOKEN secret."
+  type: non_functional
+  implementation: .github/workflows/ingest.yml, .github/workflows/train.yml
+  test: null
+  status: "IMPLEMENTED; live behavior confirmed working at least twice (2026-09-15), currently failing on an unrelated bug (see ERR-006)"

@@ -1,0 +1,4813 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Scientific & Technical Specification for the Exocomet Hunter detection pipeline">
+      
+      
+      
+        <link rel="canonical" href="https://AJpro-merc.github.io/exocomet-hunter/">
+      
+      
+      
+        <link rel="next" href="SPECIFICATION_STATUS/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Exocomet Hunter — EHS-CTS</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#ehs-cts-exocomet-hunter-scientific-technical-specification" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="Exocomet Hunter — EHS-CTS" class="md-header__button md-logo" aria-label="Exocomet Hunter — EHS-CTS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Exocomet Hunter — EHS-CTS
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/AJpro-merc/exocomet-hunter" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AJpro-merc/exocomet-hunter
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="Exocomet Hunter — EHS-CTS" class="md-nav__button md-logo" aria-label="Exocomet Hunter — EHS-CTS" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Exocomet Hunter — EHS-CTS
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/AJpro-merc/exocomet-hunter" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AJpro-merc/exocomet-hunter
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#part-i-foundations-science-0005" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part I — Foundations &amp; science (00–05)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-ii-data-storage-0610" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part II — Data &amp; storage (06–10)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-iii-pipeline-detection-algorithms-1121" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part III — Pipeline &amp; detection algorithms (11–21)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-iv-results-automation-and-infrastructure-2234" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part IV — Results, automation, and infrastructure (22–34)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-v-code-reference-35" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part V — Code reference (35)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-vi-integrity-references-reference-material-3642" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part VI — Integrity, references, reference material (36–42)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-vii-traceability-evidence-requirements-4348" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part VII — Traceability, evidence, requirements (43–48)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-viii-negative-results-benchmarking-4950-70" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part VIII — Negative results &amp; benchmarking (49–50, 70)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-ix-observability-state-reliability-5152-59" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part IX — Observability, state, reliability (51–52, 59)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-x-scientific-rigor-53-6566-69" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part X — Scientific rigor (53, 65–66, 69)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-xi-ai-boundary-supply-chain-security-5455-60" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part XI — AI boundary, supply chain, security (54–55, 60)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-xii-lineage-contracts-diagrams-5658" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part XII — Lineage, contracts, diagrams (56–58)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-xiii-reproducibility-release-6163" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part XIII — Reproducibility &amp; release (61–63)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-xiv-candidates-follow-up-curation-64-6768" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part XIV — Candidates, follow-up, curation (64, 67–68)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-xv-documentation-self-checking-7173" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part XV — Documentation self-checking (71–73)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-xvi-appendices-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part XVI — Appendices &amp; dashboard
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#machine-readable-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Machine-readable registry
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standing-infrastructure-repo-root-githooks-not-part-of-the-numbered-spec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standing infrastructure (repo root / .githooks/, not part of the numbered spec)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Known gap
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="SPECIFICATION_STATUS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Status Dashboard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    I. Foundations & Science
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    I. Foundations & Science
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="00_document_control/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="01_project_foundation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Foundation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="02_scientific_motivation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scientific Motivation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="03_astronomical_foundations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Astronomical Foundations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="04_exocomet_physics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exocomet Physics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="05_detection_theory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detection Theory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    II. Data & Storage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    II. Data & Storage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="06_data_sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Sources
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="07_data_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="08_storage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="09_software_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="10_configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    III. Pipeline & Detection
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    III. Pipeline & Detection
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="11_pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="12_acquisition/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Acquisition
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="13_detrending/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detrending
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="14_candidate_detection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Candidate Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="15_model_fitting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model Fitting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="16_statistics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Statistics & Flagging Rule
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="17_uncertainty/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uncertainty Estimation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="18_vetting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vetting (Not Implemented)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="19_candidates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Candidate Records
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="20_validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="21_injection_recovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Injection & Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IV. Results, Automation & Infra
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    IV. Results, Automation & Infra
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="22_published_validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Published Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="23_automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation (GitHub Actions)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="24_database/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Local Database View
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="25_reproducibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reproducibility
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="26_performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="27_testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="28_limitations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Limitations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="29_reliability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reliability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="30_future_detectors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future Detectors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="31_machine_learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Machine Learning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="32_visualization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Visualization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="33_results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Results Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="34_development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    V. Code Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    V. Code Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="35_code_reference/io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    exocomet.io
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="35_code_reference/detrend/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    exocomet.detrend
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="35_code_reference/detect/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    exocomet.detect
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="35_code_reference/calibration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    exocomet.calibration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="35_code_reference/vetting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    exocomet.vetting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="35_code_reference/viz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    exocomet.viz
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="35_code_reference/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    exocomet.cli
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VI. Reference Material
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    VI. Reference Material
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="36_research_integrity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research Integrity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="37_references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="38_mathematics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mathematics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="39_data_dictionary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Dictionary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="40_glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="41_troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="42_roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VII. Traceability & Requirements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    VII. Traceability & Requirements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="43_scientific_claims_registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scientific Claims Registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="44_requirements_specification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements Specification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="45_decision_specification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decision Specification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="46_parameter_provenance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parameter Provenance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="47_data_quality_specification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Quality Specification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="48_experiment_registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiment Registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VIII. Negative Results & Benchmarking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    VIII. Negative Results & Benchmarking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="49_negative_results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Negative Results
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="50_methodological_benchmarking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Methodological Benchmarking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="70_performance_benchmarking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Benchmarking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IX. Observability & State
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    IX. Observability & State
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="51_pipeline_observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="52_scientific_state_versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scientific State Versioning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="59_error_taxonomy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Error Taxonomy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    X. Scientific Rigor
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    X. Scientific Rigor
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="53_threats_to_validity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Threats to Validity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="65_false_positive_catalogue/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    False-Positive Catalogue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="66_falsification_and_alternatives/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Falsification & Alternatives
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="69_statistical_methodology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Statistical Methodology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    XI. AI Boundary, Supply Chain & Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    XI. AI Boundary, Supply Chain & Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="54_automated_scientific_reasoning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automated Scientific Reasoning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="55_research_supply_chain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research Supply Chain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="60_security_and_trust/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security & Trust
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_14" id="__nav_14_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    XII. Lineage, Contracts & Diagrams
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_14">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    XII. Lineage, Contracts & Diagrams
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="56_architecture_diagrams/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Diagrams
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="57_api_interface_contracts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API / Interface Contracts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="58_data_lineage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Lineage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    XIII. Reproducibility & Release
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    XIII. Reproducibility & Release
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="61_reproduction_packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reproduction Packages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="62_release_and_versioning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release & Versioning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="63_change_impact_analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Change Impact Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    XIV. Candidates, Follow-up & Curation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    XIV. Candidates, Follow-up & Curation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="64_candidate_audit_trail/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Candidate Audit Trail
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="67_observation_followup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observation Follow-up
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="68_dataset_curation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dataset Curation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_17" >
+        
+          
+          <label class="md-nav__link" for="__nav_17" id="__nav_17_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    XV. Documentation Self-Checking
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_17_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_17">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    XV. Documentation Self-Checking
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="71_documentation_quality_system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation Quality System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="72_code_doc_crosscheck/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code/Doc Cross-Check
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="73_project_maturity_model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Maturity Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="76_appendices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#part-i-foundations-science-0005" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part I — Foundations &amp; science (00–05)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-ii-data-storage-0610" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part II — Data &amp; storage (06–10)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-iii-pipeline-detection-algorithms-1121" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part III — Pipeline &amp; detection algorithms (11–21)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-iv-results-automation-and-infrastructure-2234" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part IV — Results, automation, and infrastructure (22–34)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-v-code-reference-35" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part V — Code reference (35)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-vi-integrity-references-reference-material-3642" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part VI — Integrity, references, reference material (36–42)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-vii-traceability-evidence-requirements-4348" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part VII — Traceability, evidence, requirements (43–48)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-viii-negative-results-benchmarking-4950-70" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part VIII — Negative results &amp; benchmarking (49–50, 70)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-ix-observability-state-reliability-5152-59" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part IX — Observability, state, reliability (51–52, 59)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-x-scientific-rigor-53-6566-69" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part X — Scientific rigor (53, 65–66, 69)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-xi-ai-boundary-supply-chain-security-5455-60" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part XI — AI boundary, supply chain, security (54–55, 60)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-xii-lineage-contracts-diagrams-5658" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part XII — Lineage, contracts, diagrams (56–58)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-xiii-reproducibility-release-6163" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part XIII — Reproducibility &amp; release (61–63)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-xiv-candidates-follow-up-curation-64-6768" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part XIV — Candidates, follow-up, curation (64, 67–68)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-xv-documentation-self-checking-7173" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part XV — Documentation self-checking (71–73)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-xvi-appendices-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part XVI — Appendices &amp; dashboard
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#machine-readable-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Machine-readable registry
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standing-infrastructure-repo-root-githooks-not-part-of-the-numbered-spec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standing infrastructure (repo root / .githooks/, not part of the numbered spec)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Known gap
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="ehs-cts-exocomet-hunter-scientific-technical-specification">EHS-CTS — Exocomet Hunter Scientific &amp; Technical Specification<a class="headerlink" href="#ehs-cts-exocomet-hunter-scientific-technical-specification" title="Permanent link">&para;</a></h1>
+<p><strong>Master index. Version 1.0 (DRAFT). Reflects repo state as of 2026-09-16, commit <code>01c2051</code>,
+plus a real uncommitted working-tree fix — see <a href="59_error_taxonomy/"><code>59_error_taxonomy.md</code></a>
+ERR-006 and <a href="SPECIFICATION_STATUS/"><code>SPECIFICATION_STATUS.md</code></a>.</strong></p>
+<p>This document was built by reading the actual source, configuration, tests, workflows, and
+session history of <code>exocomet-hunter</code> — not from a generic template. Where a capability
+does not exist yet, the relevant section says so explicitly using one of:
+<code>IMPLEMENTED · TESTED · VALIDATED · OPERATIONAL · PARTIAL · PLANNED · BLOCKED · DEPRECATED ·
+UNKNOWN · NOT IMPLEMENTED · UNVERIFIED</code>. Read <a href="SPECIFICATION_STATUS/"><code>SPECIFICATION_STATUS.md</code></a>
+first for the honest one-page health view before trusting any individual section's depth.</p>
+<p><strong>Vocabulary discipline enforced throughout:</strong> never "confirmed" — only "candidate",
+"candidate event", "exocomet-like morphology", "candidate consistent with an exocomet
+interpretation". No numeric claim appears without source/method/date, or it's <code>UNVERIFIED</code>.</p>
+<hr />
+<h2 id="part-i-foundations-science-0005">Part I — Foundations &amp; science (00–05)<a class="headerlink" href="#part-i-foundations-science-0005" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Section</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Document Control</td>
+<td><a href="00_document_control/">00_document_control.md</a></td>
+</tr>
+<tr>
+<td>1</td>
+<td>Project Foundation</td>
+<td><a href="01_project_foundation/">01_project_foundation.md</a></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Scientific Motivation</td>
+<td><a href="02_scientific_motivation/">02_scientific_motivation.md</a></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Astronomical Foundations</td>
+<td><a href="03_astronomical_foundations/">03_astronomical_foundations.md</a></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Exocomet Physics</td>
+<td><a href="04_exocomet_physics/">04_exocomet_physics.md</a></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Detection Theory — τ/σ, ΔBIC, the half-depth sign-flip (research log 003)</td>
+<td><a href="05_detection_theory/">05_detection_theory.md</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="part-ii-data-storage-0610">Part II — Data &amp; storage (06–10)<a class="headerlink" href="#part-ii-data-storage-0610" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Section</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6</td>
+<td>Data Sources (Kepler/TESS/MAST/VizieR real; SIMBAD/Gaia not wired in)</td>
+<td><a href="06_data_sources/">06_data_sources.md</a></td>
+</tr>
+<tr>
+<td>7</td>
+<td>Data Architecture</td>
+<td><a href="07_data_architecture/">07_data_architecture.md</a></td>
+</tr>
+<tr>
+<td>8</td>
+<td>Storage (parquet extract, JSONL ledger, disposable SQLite view)</td>
+<td><a href="08_storage/">08_storage.md</a></td>
+</tr>
+<tr>
+<td>9</td>
+<td>Software Architecture (real ABCs from <code>core/interfaces.py</code>)</td>
+<td><a href="09_software_architecture/">09_software_architecture.md</a></td>
+</tr>
+<tr>
+<td>10</td>
+<td>Configuration (<code>thresholds.yaml</code>, <code>validation_targets.yaml</code>)</td>
+<td><a href="10_configuration/">10_configuration.md</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="part-iii-pipeline-detection-algorithms-1121">Part III — Pipeline &amp; detection algorithms (11–21)<a class="headerlink" href="#part-iii-pipeline-detection-algorithms-1121" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Section</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>11</td>
+<td>Pipeline Overview (real six-step ingest ordering)</td>
+<td><a href="11_pipeline/">11_pipeline.md</a></td>
+</tr>
+<tr>
+<td>12</td>
+<td>Data Acquisition</td>
+<td><a href="12_acquisition/">12_acquisition.md</a></td>
+</tr>
+<tr>
+<td>13</td>
+<td>Detrending (A1: windows in days, not cadences)</td>
+<td><a href="13_detrending/">13_detrending.md</a></td>
+</tr>
+<tr>
+<td>14</td>
+<td>Candidate Detection</td>
+<td><a href="14_candidate_detection/">14_candidate_detection.md</a></td>
+</tr>
+<tr>
+<td>15</td>
+<td>Model Fitting (incl. H2 fit-instability finding, 3.47× outlier)</td>
+<td><a href="15_model_fitting/">15_model_fitting.md</a></td>
+</tr>
+<tr>
+<td>16</td>
+<td>Statistics and the Flagging Rule (A4 fix, research log 007)</td>
+<td><a href="16_statistics/">16_statistics.md</a></td>
+</tr>
+<tr>
+<td>17</td>
+<td>Uncertainty Estimation (bootstrap)</td>
+<td><a href="17_uncertainty/">17_uncertainty.md</a></td>
+</tr>
+<tr>
+<td>18</td>
+<td>Vetting — <strong>NOT IMPLEMENTED</strong>, package is empty</td>
+<td><a href="18_vetting/">18_vetting.md</a></td>
+</tr>
+<tr>
+<td>19</td>
+<td>Candidate Records</td>
+<td><a href="19_candidates/">19_candidates.md</a></td>
+</tr>
+<tr>
+<td>20</td>
+<td>Validation (six-event exam, hold-out guard)</td>
+<td><a href="20_validation/">20_validation.md</a></td>
+</tr>
+<tr>
+<td>21</td>
+<td>Injection and Recovery (README numbers flagged UNVERIFIED)</td>
+<td><a href="21_injection_recovery/">21_injection_recovery.md</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="part-iv-results-automation-and-infrastructure-2234">Part IV — Results, automation, and infrastructure (22–34)<a class="headerlink" href="#part-iv-results-automation-and-infrastructure-2234" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Section</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>22</td>
+<td>Comparison Against Published Results (KIC 3542116, depth ratio)</td>
+<td><a href="22_published_validation/">22_published_validation.md</a></td>
+</tr>
+<tr>
+<td>23</td>
+<td>Automation — GitHub Actions (live-verified <code>ingest</code> active, <code>survey</code>/<code>train</code> disabled)</td>
+<td><a href="23_automation/">23_automation.md</a></td>
+</tr>
+<tr>
+<td>24</td>
+<td>Local Database View</td>
+<td><a href="24_database/">24_database.md</a></td>
+</tr>
+<tr>
+<td>25</td>
+<td>Reproducibility</td>
+<td><a href="25_reproducibility/">25_reproducibility.md</a></td>
+</tr>
+<tr>
+<td>26</td>
+<td>Performance</td>
+<td><a href="26_performance/">26_performance.md</a></td>
+</tr>
+<tr>
+<td>27</td>
+<td>Testing — <strong>167 tests pass, 34 ruff findings, mypy cannot run</strong></td>
+<td><a href="27_testing/">27_testing.md</a></td>
+</tr>
+<tr>
+<td>28</td>
+<td>Limitations (B1 depth bias, D5 trials factor, J1 pixel vetting)</td>
+<td><a href="28_limitations/">28_limitations.md</a></td>
+</tr>
+<tr>
+<td>29</td>
+<td>Reliability (three real incidents, root-caused)</td>
+<td><a href="29_reliability/">29_reliability.md</a></td>
+</tr>
+<tr>
+<td>30</td>
+<td>Future Detectors (H4, planned only)</td>
+<td><a href="30_future_detectors/">30_future_detectors.md</a></td>
+</tr>
+<tr>
+<td>31</td>
+<td>Machine Learning — <strong>C3 has not run, no evaluation numbers exist anywhere</strong></td>
+<td><a href="31_machine_learning/">31_machine_learning.md</a></td>
+</tr>
+<tr>
+<td>32</td>
+<td>Visualization</td>
+<td><a href="32_visualization/">32_visualization.md</a></td>
+</tr>
+<tr>
+<td>33</td>
+<td>Results Repository (external data repo, real layout)</td>
+<td><a href="33_results/">33_results.md</a></td>
+</tr>
+<tr>
+<td>34</td>
+<td>Development</td>
+<td><a href="34_development/">34_development.md</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="part-v-code-reference-35">Part V — Code reference (35)<a class="headerlink" href="#part-v-code-reference-35" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>exocomet.io</code></td>
+<td><a href="35_code_reference/io/">35_code_reference/io.md</a></td>
+</tr>
+<tr>
+<td><code>exocomet.detrend</code></td>
+<td><a href="35_code_reference/detrend/">35_code_reference/detrend.md</a></td>
+</tr>
+<tr>
+<td><code>exocomet.detect</code></td>
+<td><a href="35_code_reference/detect/">35_code_reference/detect.md</a></td>
+</tr>
+<tr>
+<td><code>exocomet.calibration</code></td>
+<td><a href="35_code_reference/calibration/">35_code_reference/calibration.md</a></td>
+</tr>
+<tr>
+<td><code>exocomet.vetting</code> — empty package</td>
+<td><a href="35_code_reference/vetting/">35_code_reference/vetting.md</a></td>
+</tr>
+<tr>
+<td><code>exocomet.viz</code></td>
+<td><a href="35_code_reference/viz/">35_code_reference/viz.md</a></td>
+</tr>
+<tr>
+<td><code>exocomet.cli</code></td>
+<td><a href="35_code_reference/cli/">35_code_reference/cli.md</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="part-vi-integrity-references-reference-material-3642">Part VI — Integrity, references, reference material (36–42)<a class="headerlink" href="#part-vi-integrity-references-reference-material-3642" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Section</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>36</td>
+<td>Research Integrity</td>
+<td><a href="36_research_integrity/">36_research_integrity.md</a></td>
+</tr>
+<tr>
+<td>37</td>
+<td>References</td>
+<td><a href="37_references/">37_references.md</a></td>
+</tr>
+<tr>
+<td>38</td>
+<td>Mathematics (formulas transcribed from actual source)</td>
+<td><a href="38_mathematics/">38_mathematics.md</a></td>
+</tr>
+<tr>
+<td>39</td>
+<td>Data Dictionary (<code>core/types.py</code> dataclasses)</td>
+<td><a href="39_data_dictionary/">39_data_dictionary.md</a></td>
+</tr>
+<tr>
+<td>40</td>
+<td>Glossary</td>
+<td><a href="40_glossary/">40_glossary.md</a></td>
+</tr>
+<tr>
+<td>41</td>
+<td>Troubleshooting</td>
+<td><a href="41_troubleshooting/">41_troubleshooting.md</a></td>
+</tr>
+<tr>
+<td>42</td>
+<td>Roadmap (condensed PARTS D–J snapshot)</td>
+<td><a href="42_roadmap/">42_roadmap.md</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="part-vii-traceability-evidence-requirements-4348">Part VII — Traceability, evidence, requirements (43–48)<a class="headerlink" href="#part-vii-traceability-evidence-requirements-4348" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Section</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>43</td>
+<td>Scientific Claims Registry</td>
+<td><a href="43_scientific_claims_registry/">43_scientific_claims_registry.md</a></td>
+</tr>
+<tr>
+<td>44</td>
+<td>Requirements Specification</td>
+<td><a href="44_requirements_specification/">44_requirements_specification.md</a></td>
+</tr>
+<tr>
+<td>45</td>
+<td>Decision Specification</td>
+<td><a href="45_decision_specification/">45_decision_specification.md</a></td>
+</tr>
+<tr>
+<td>46</td>
+<td>Parameter Provenance (<code>thresholds.yaml</code>, field by field)</td>
+<td><a href="46_parameter_provenance/">46_parameter_provenance.md</a></td>
+</tr>
+<tr>
+<td>47</td>
+<td>Data Quality Specification</td>
+<td><a href="47_data_quality_specification/">47_data_quality_specification.md</a></td>
+</tr>
+<tr>
+<td>48</td>
+<td>Experiment Registry</td>
+<td><a href="48_experiment_registry/">48_experiment_registry.md</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="part-viii-negative-results-benchmarking-4950-70">Part VIII — Negative results &amp; benchmarking (49–50, 70)<a class="headerlink" href="#part-viii-negative-results-benchmarking-4950-70" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Section</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>49</td>
+<td>Negative Results (KIC 1161345's 43-flagged anomaly, B2's unexplained event)</td>
+<td><a href="49_negative_results/">49_negative_results.md</a></td>
+</tr>
+<tr>
+<td>50</td>
+<td>Methodological Benchmarking — NOT IMPLEMENTED</td>
+<td><a href="50_methodological_benchmarking/">50_methodological_benchmarking.md</a></td>
+</tr>
+<tr>
+<td>70</td>
+<td>Performance Benchmarking</td>
+<td><a href="70_performance_benchmarking/">70_performance_benchmarking.md</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="part-ix-observability-state-reliability-5152-59">Part IX — Observability, state, reliability (51–52, 59)<a class="headerlink" href="#part-ix-observability-state-reliability-5152-59" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Section</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>51</td>
+<td>Pipeline Observability</td>
+<td><a href="51_pipeline_observability/">51_pipeline_observability.md</a></td>
+</tr>
+<tr>
+<td>52</td>
+<td>Scientific State Versioning</td>
+<td><a href="52_scientific_state_versioning/">52_scientific_state_versioning.md</a></td>
+</tr>
+<tr>
+<td>59</td>
+<td>Error Taxonomy (incl. ERR-006, today's live ingest bug)</td>
+<td><a href="59_error_taxonomy/">59_error_taxonomy.md</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="part-x-scientific-rigor-53-6566-69">Part X — Scientific rigor (53, 65–66, 69)<a class="headerlink" href="#part-x-scientific-rigor-53-6566-69" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Section</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>53</td>
+<td>Threats to Validity</td>
+<td><a href="53_threats_to_validity/">53_threats_to_validity.md</a></td>
+</tr>
+<tr>
+<td>65</td>
+<td>False-Positive Catalogue (7 real injection classes + 4 planned)</td>
+<td><a href="65_false_positive_catalogue/">65_false_positive_catalogue.md</a></td>
+</tr>
+<tr>
+<td>66</td>
+<td>Falsification and Alternatives</td>
+<td><a href="66_falsification_and_alternatives/">66_falsification_and_alternatives.md</a></td>
+</tr>
+<tr>
+<td>69</td>
+<td>Statistical Methodology</td>
+<td><a href="69_statistical_methodology/">69_statistical_methodology.md</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="part-xi-ai-boundary-supply-chain-security-5455-60">Part XI — AI boundary, supply chain, security (54–55, 60)<a class="headerlink" href="#part-xi-ai-boundary-supply-chain-security-5455-60" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Section</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>54</td>
+<td>Automated Scientific Reasoning (H1, the planned AI-skeptic review layer)</td>
+<td><a href="54_automated_scientific_reasoning/">54_automated_scientific_reasoning.md</a></td>
+</tr>
+<tr>
+<td>55</td>
+<td>Research Supply Chain (real dependency versions)</td>
+<td><a href="55_research_supply_chain/">55_research_supply_chain.md</a></td>
+</tr>
+<tr>
+<td>60</td>
+<td>Security and Trust (<code>DATA_REPO_TOKEN</code> handling)</td>
+<td><a href="60_security_and_trust/">60_security_and_trust.md</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="part-xii-lineage-contracts-diagrams-5658">Part XII — Lineage, contracts, diagrams (56–58)<a class="headerlink" href="#part-xii-lineage-contracts-diagrams-5658" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Section</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>56</td>
+<td>Architecture Diagrams (Mermaid, real module graph)</td>
+<td><a href="56_architecture_diagrams/">56_architecture_diagrams.md</a></td>
+</tr>
+<tr>
+<td>57</td>
+<td>API / Interface Contracts</td>
+<td><a href="57_api_interface_contracts/">57_api_interface_contracts.md</a></td>
+</tr>
+<tr>
+<td>58</td>
+<td>Data Lineage</td>
+<td><a href="58_data_lineage/">58_data_lineage.md</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="part-xiii-reproducibility-release-6163">Part XIII — Reproducibility &amp; release (61–63)<a class="headerlink" href="#part-xiii-reproducibility-release-6163" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Section</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>61</td>
+<td>Reproduction Packages — NOT IMPLEMENTED</td>
+<td><a href="61_reproduction_packages/">61_reproduction_packages.md</a></td>
+</tr>
+<tr>
+<td>62</td>
+<td>Release and Versioning</td>
+<td><a href="62_release_and_versioning/">62_release_and_versioning.md</a></td>
+</tr>
+<tr>
+<td>63</td>
+<td>Change Impact Analysis (A4 worked example)</td>
+<td><a href="63_change_impact_analysis/">63_change_impact_analysis.md</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="part-xiv-candidates-follow-up-curation-64-6768">Part XIV — Candidates, follow-up, curation (64, 67–68)<a class="headerlink" href="#part-xiv-candidates-follow-up-curation-64-6768" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Section</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>64</td>
+<td>Candidate Audit Trail</td>
+<td><a href="64_candidate_audit_trail/">64_candidate_audit_trail.md</a></td>
+</tr>
+<tr>
+<td>67</td>
+<td>Observation Follow-up — NOT IMPLEMENTED</td>
+<td><a href="67_observation_followup/">67_observation_followup.md</a></td>
+</tr>
+<tr>
+<td>68</td>
+<td>Dataset Curation (real ledger stats, re-verified)</td>
+<td><a href="68_dataset_curation/">68_dataset_curation.md</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="part-xv-documentation-self-checking-7173">Part XV — Documentation self-checking (71–73)<a class="headerlink" href="#part-xv-documentation-self-checking-7173" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Section</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>71</td>
+<td>Documentation Quality System (manual checklist, not CI)</td>
+<td><a href="71_documentation_quality_system/">71_documentation_quality_system.md</a></td>
+</tr>
+<tr>
+<td>72</td>
+<td>Code/Documentation Cross-Check</td>
+<td><a href="72_code_doc_crosscheck/">72_code_doc_crosscheck.md</a></td>
+</tr>
+<tr>
+<td>73</td>
+<td>Project Maturity Model (per-subsystem status table)</td>
+<td><a href="73_project_maturity_model/">73_project_maturity_model.md</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="part-xvi-appendices-dashboard">Part XVI — Appendices &amp; dashboard<a class="headerlink" href="#part-xvi-appendices-dashboard" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Appendices (repo tree, config reference, real examples)</td>
+<td><a href="76_appendices/">76_appendices.md</a></td>
+</tr>
+<tr>
+<td><strong>Specification Status Dashboard</strong> — read this first</td>
+<td><a href="SPECIFICATION_STATUS/">SPECIFICATION_STATUS.md</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="machine-readable-registry">Machine-readable registry<a class="headerlink" href="#machine-readable-registry" title="Permanent link">&para;</a></h2>
+<p>Structured twins of the tables in Part VII–IX, for future automated validation against the
+codebase — not narrative content.</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Mirrors</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="registry/claims.yaml">registry/claims.yaml</a></td>
+<td>§43</td>
+</tr>
+<tr>
+<td><a href="registry/requirements.yaml">registry/requirements.yaml</a></td>
+<td>§44</td>
+</tr>
+<tr>
+<td><a href="registry/parameters.yaml">registry/parameters.yaml</a></td>
+<td>§46</td>
+</tr>
+<tr>
+<td><a href="registry/experiments.yaml">registry/experiments.yaml</a></td>
+<td>§48</td>
+</tr>
+<tr>
+<td><a href="registry/errors.yaml">registry/errors.yaml</a></td>
+<td>§59</td>
+</tr>
+<tr>
+<td><a href="registry/interfaces.yaml">registry/interfaces.yaml</a></td>
+<td>§57</td>
+</tr>
+<tr>
+<td><a href="registry/datasets.yaml">registry/datasets.yaml</a></td>
+<td>§68</td>
+</tr>
+</tbody>
+</table>
+<h2 id="standing-infrastructure-repo-root-githooks-not-part-of-the-numbered-spec">Standing infrastructure (repo root / <code>.githooks/</code>, not part of the numbered spec)<a class="headerlink" href="#standing-infrastructure-repo-root-githooks-not-part-of-the-numbered-spec" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>docs/DOCUMENTATION_WORKFLOW.md</code> (repo root, outside this site) — the full per-commit /
+  20-commit rollup mechanism, setup instructions (<code>git config core.hooksPath .githooks</code>).</li>
+<li><code>docs/CHANGELOG_PENDING.md</code> (repo root, outside this site) — per-commit scaffold log (empty
+  until the next commit fires the hook).</li>
+<li><code>docs/CHANGELOG.md</code> (repo root, outside this site) — permanent compressed rollup history
+  (empty until the first 20-commit rollup).</li>
+<li><code>.githooks/post-commit</code> — the hook itself, executable, tested in an isolated scratch repo.</li>
+</ul>
+<h2 id="known-gap">Known gap<a class="headerlink" href="#known-gap" title="Permanent link">&para;</a></h2>
+<p>Sections numbered 74–75 in the original outline (a status dashboard and index-extension concept)
+were resolved as <code>SPECIFICATION_STATUS.md</code> and this <code>index.md</code> itself rather than as separate
+numbered files — there is no missing content, just no standalone <code>74_*.md</code>/<code>75_*.md</code> files by
+design. See <code>SPECIFICATION_STATUS.md</code> for the one open item worth tracking: the two most recent
+real <code>ingest</code> production runs (2026-09-16, 00:05 and 05:50 UTC) failed on the bug described in
+§59 ERR-006, and the fix is verified but <strong>not yet committed</strong> as of this document's version.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "navigation.indexes", "search.suggest", "search.highlight", "content.code.copy", "toc.follow"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

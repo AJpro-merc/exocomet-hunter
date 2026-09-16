@@ -1,0 +1,20 @@
+# Machine-readable mirror of 68_dataset_curation.md.
+# Source: AJpro-merc/exocomet-hunter-data/ledger.jsonl, re-verified by direct
+# clone.
+# Generated: 2026-09-16, against commit 01c2051.
+
+ledger_targets_total: 33
+ledger_success: 25
+ledger_failed: 8
+as_of_date: "2026-09-16"
+source: "https://github.com/AJpro-merc/exocomet-hunter-data (ledger.jsonl, directly cloned and counted)"
+notes:
+  - "33 lines == 33 unique (target_id, mission) pairs -- no target has yet been retried."
+  - "training/ and models/ directories in the same clone contain only .gitkeep -- no accumulated classifier training data or trained model exists yet."
+  - >
+    KEPLER_HOST_STARS is 18 targets in the local uncommitted working tree but
+    23 targets (including 5 now-known-nonexistent IDs) in the actually
+    committed and currently-deployed code at 01c2051 -- see errors.yaml
+    ERR-006 and 68_dataset_curation.md.
+  - "EXCLUDED_HOLD_OUT_TARGETS: [KIC 3542116, KIC 11084727]"
+  - "KNOWN_BAD_HOSTS: [KIC 1026032]"

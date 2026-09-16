@@ -1,0 +1,74 @@
+# Machine-readable mirror of 59_error_taxonomy.md.
+# Generated: 2026-09-16, against commit 01c2051 (plus noted uncommitted working-tree state).
+
+- id: ERR-001
+  class: exocomet.io.download.MastTimeoutError
+  cause: >
+    A MAST network call (search_lightcurve or download_all) stalls on a socket
+    that never returns, with no deadline.
+  detection: "_call_with_timeout() daemon-thread join timeout"
+  recovery: "_call_with_retries() bounded retry with exponential backoff; per-target wall-clock budget in iter_light_curves()"
+  test_coverage: tests/unit/test_download_timeout.py
+
+- id: ERR-002
+  class: "poisoned-cache retry (truncated FITS file)"
+  cause: >
+    A download interrupted partway leaves a truncated FITS file cached on disk;
+    lightkurve/astropy does not know the cached file is broken and every retry
+    fails identically against it.
+  detection: "manual (error message match: 'may be corrupt due to an interrupted download')"
+  recovery: "_call_with_retries() cleanup callback wired to _discard_cached() before each retry"
+  test_coverage: "NOT TESTED (validated by direct observation only)"
+
+- id: ERR-003
+  class: "ledger false-success"
+  cause: >
+    A ledger line claimed success for a target whose extract file did not
+    actually exist on disk, traced to a live recurrence of ERR-002 for a
+    different star.
+  detection: "manual (disk vs. ledger mismatch), reproduced only on a third live attempt"
+  recovery: "immediate readback check in scripts/ingest.py::process_one_target after save_extract()"
+  test_coverage: "NOT TESTED (no dedicated regression test found)"
+
+- id: ERR-004
+  class: "CWD-relative cache path"
+  cause: >
+    io.download.DEFAULT_CACHE_DIR = Path('data/raw') is relative to the
+    process's CWD; running ingest.py from scripts/ silently created
+    scripts/data/raw/ instead of the repo-root cache.
+  detection: "manual (wrong directory observed during real MAST testing)"
+  recovery: >
+    scripts/ingest.py computes an explicit Path(__file__)-based raw_cache_dir;
+    the shared io/download.py default itself is UNCHANGED and still CWD-relative.
+  test_coverage: "NOT TESTED"
+
+- id: ERR-005
+  class: "_discard_cached silent no-op"
+  cause: >
+    An earlier version matched a normalized target_id slug against
+    lightkurve's own pipeline-internal cache directory names, which never
+    contain the catalog string searched with -- matched nothing, for any
+    target, on either mission.
+  detection: "manual (166 MB of 'already discarded' downloads found accumulated on disk)"
+  recovery: "_discard_cached() now wipes the whole mastDownload tree rather than pattern-matching"
+  test_coverage: UNVERIFIED
+
+- id: ERR-006
+  class: "FileNotFoundError misclassified as retryable (permanent vs transient failure conflation)"
+  cause: >
+    Five hardcoded KIC identifiers in KEPLER_HOST_STARS do not correspond to
+    any real Kepler observation; the committed code retries them as ordinary
+    (transient) failures, burning the whole per-run target budget every time
+    and failing the job outright, which also skips the downstream TESS job.
+  detection: "live observation: two identical failures six hours apart, 2026-09-16 ingest.yml runs"
+  recovery: >
+    scripts/ingest.py classifies FileNotFoundError as permanent and records it
+    at attempt=max_attempts immediately; scripts/build_kepler_host_list.py
+    removes the five bad IDs outright. BOTH FIXES EXIST ONLY IN THE LOCAL
+    WORKING TREE as of commit 01c2051 -- confirmed via `git status`/`git diff`
+    -- and have NOT been committed or pushed.
+    The live pipeline (per 23_automation.md's direct `gh run list` query,
+    2026-09-16) is still failing on this exact bug as of the most recent data
+    point available.
+  test_coverage: UNVERIFIED
+  status: "PARTIAL -- fix written, not yet shipped"

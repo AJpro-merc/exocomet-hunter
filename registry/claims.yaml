@@ -1,0 +1,228 @@
+# Machine-readable mirror of 43_scientific_claims_registry.md.
+#
+# Status vocabulary (strict — no other values allowed):
+#   IMPLEMENTED, TESTED, VALIDATED, OPERATIONAL, PARTIAL, PLANNED, BLOCKED,
+#   DEPRECATED, UNKNOWN, NOT IMPLEMENTED, UNVERIFIED
+#
+# "The code exists" (IMPLEMENTED) and "the scientific claim is validated"
+# (VALIDATED) are different things and must never be conflated. `evidence`
+# entries are structured (source_type + source), not bare path strings, so a
+# future script can distinguish a test result from a doc reference from a
+# session-log narrative. `revalidation_required: true` marks a claim whose
+# supporting evidence predates a later code change and has not been re-run
+# since — this is the field a rollup pass should scan first.
+#
+# Generated: 2026-09-16, against commit 01c2051.
+
+- id: CLAIM-001
+  statement: >
+    All six published KIC 3542116 exocomet transit events (Rappaport et al. 2018)
+    are recovered by the detector, within 0.5 d of the published epoch.
+  type: detection_recall
+  status: VALIDATED
+  evidence:
+    - source_type: script
+      source: scripts/run_validation.py
+    - source_type: config
+      source: config/validation_targets.yaml
+    - source_type: doc
+      source: README.md
+  commit: 01c2051
+  measured_at: "2026-09-14"
+  revalidation_required: false
+
+- id: CLAIM-002
+  statement: >
+    The flagging rule delta_bic > 10 and tau_over_sigma > 1 recovers all six
+    KIC 3542116 dips while rejecting a synthetic time-reversed mirror-image event
+    that a delta-BIC-only rule would have flagged.
+  type: discriminative_validity
+  status: VALIDATED
+  evidence:
+    - source_type: research_log
+      source: docs/research_log/007-delta-bic-is-direction-blind.md
+    - source_type: code
+      source: src/exocomet/detect/scoring.py
+  commit: 01c2051
+  measured_at: "2026-09-15"
+  revalidation_required: false
+
+- id: CLAIM-003
+  statement: >
+    Pinning TESS light-curve retrieval to a single author/exptime (SPOC/120s)
+    avoids cross-cadence window mismatch and a TARS flux-normalization bug.
+  type: engineering_fix
+  status: VALIDATED
+  evidence:
+    - source_type: doc
+      source: docs/NEXT_STEPS.md
+    - source_type: test
+      source: tests/unit/test_cross_cadence.py
+    - source_type: code
+      source: src/exocomet/io/download.py
+  commit: 01c2051
+  measured_at: "2026-09-14"
+  revalidation_required: false
+  note: "validated for the specific case tested (beta Pic, 54->10 products)"
+
+- id: CLAIM-004
+  statement: >
+    The resumable ingestion pipeline can complete a full unattended
+    fetch->extract->detrend->detect->save->push cycle on GitHub Actions.
+  type: operational
+  status: VALIDATED
+  evidence:
+    - source_type: session_log
+      source: "Session Log 2026-09-15.md#section-12"
+    - source_type: doc
+      source: docs/specification/23_automation.md
+  commit: 01c2051
+  measured_at: "2026-09-15"
+  revalidation_required: true
+  note: >
+    confirmed successful at least twice (2026-09-15 17:50 and 21:07 UTC), but
+    see CLAIM-105 — the same workflow has since failed twice more
+    (2026-09-16) on a different, now-fixed-but-uncommitted bug. The
+    end-to-end mechanism is validated; current continuity is not.
+
+- id: CLAIM-005
+  statement: "Kepler full-mission processing (~65,000 cadences) runs in ~0.8 s/star."
+  type: performance
+  status: UNVERIFIED
+  evidence:
+    - source_type: doc
+      source: README.md
+    - source_type: session_log
+      source: "Session Log 2026-09-13"
+  commit: 01c2051
+  measured_at: "2026-09-13"
+  revalidation_required: true
+  note: "measured before A1/A4 changes; not re-run since"
+
+- id: CLAIM-006
+  statement: >
+    Injecting 200 synthetic comets gives a 50% detection floor near 750 ppm and
+    100% recovery above 1000 ppm.
+  type: sensitivity
+  status: UNVERIFIED
+  evidence:
+    - source_type: doc
+      source: README.md
+    - source_type: code
+      source: src/exocomet/calibration/injection.py
+  commit: 01c2051
+  measured_at: UNKNOWN
+  revalidation_required: true
+  note: "Next Steps B8: measured before A1/A4 fixes, not regenerated; no supporting run artifact found in-repo or in the data repo"
+
+- id: CLAIM-007
+  statement: >
+    The append-only ledger design survives a process kill at any point without
+    losing or duplicating a completed record.
+  type: software_correctness
+  status: VALIDATED
+  evidence:
+    - source_type: test
+      source: tests/unit/test_ledger.py
+    - source_type: session_log
+      source: "Session Log 2026-09-15.md#section-11"
+  commit: 01c2051
+  measured_at: "2026-09-15"
+  revalidation_required: false
+
+- id: CLAIM-101
+  statement: "Measured event depths are an unbiased estimate of true transit depth."
+  type: measurement_bias
+  status: UNVERIFIED
+  evidence:
+    - source_type: research_log
+      source: docs/research_log/006-depth-offset-investigation.md
+  commit: 01c2051
+  measured_at: "2026-09-15"
+  revalidation_required: true
+  note: "10-15% residual unexplained after testing 3 hypotheses (H1/H2/H3)"
+
+- id: CLAIM-102
+  statement: "The comet-model fit converges reliably on shallow events."
+  type: model_stability
+  status: NOT IMPLEMENTED
+  evidence:
+    - source_type: research_log
+      source: docs/research_log/006-depth-offset-investigation.md
+  commit: 01c2051
+  measured_at: "2026-09-15"
+  revalidation_required: false
+  note: "one dip fit at 3.47x published depth; not investigated as its own bug yet — no fix exists to validate"
+
+- id: CLAIM-103
+  statement: "Per-event significance accounts for the number of places searched (trials factor)."
+  type: statistical_correction
+  status: NOT IMPLEMENTED
+  evidence:
+    - source_type: doc
+      source: README.md
+  commit: 01c2051
+  measured_at: UNKNOWN
+  revalidation_required: false
+  note: "no empirical look-elsewhere correction exists (Next Steps D5/J2)"
+
+- id: CLAIM-104
+  statement: >
+    A flagged candidate has been checked against a background eclipsing binary
+    via pixel-level vetting.
+  type: vetting
+  status: NOT IMPLEMENTED
+  evidence:
+    - source_type: code
+      source: src/exocomet/vetting/__init__.py
+  commit: 01c2051
+  measured_at: UNKNOWN
+  revalidation_required: false
+  note: "vetting/ contains only a docstring; no implementation exists (Next Steps J1, both external reviews' top-ranked gap)"
+
+- id: CLAIM-105
+  statement: "The ingestion pipeline runs continuously and unattended over time."
+  type: operational
+  status: BLOCKED
+  evidence:
+    - source_type: doc
+      source: docs/specification/23_automation.md
+    - source_type: doc
+      source: docs/specification/59_error_taxonomy.md
+  commit: 01c2051
+  measured_at: "2026-09-16"
+  revalidation_required: true
+  note: >
+    active workflow, but the two most recent scheduled runs (2026-09-16 00:05
+    and 05:50 UTC) both failed on a bug (ERR-006) fixed only in the
+    uncommitted working tree as of this commit. Revalidate once the fix in
+    scripts/ingest.py and scripts/build_kepler_host_list.py is committed and
+    at least one subsequent scheduled run succeeds end to end.
+
+- id: CLAIM-106
+  statement: "KIC 1161345 is a quiet star suitable as an injection host."
+  type: dataset_quality
+  status: UNVERIFIED
+  evidence:
+    - source_type: session_log
+      source: "Session Log 2026-09-15.md#section-11"
+    - source_type: session_log
+      source: "Session Log 2026-09-15.md#section-12"
+  commit: 01c2051
+  measured_at: "2026-09-15"
+  revalidation_required: true
+  note: "43/260 flagged events across two independent real fetches; not yet run through scripts/vet_host_list.py"
+
+- id: CLAIM-107
+  statement: "Vocabulary rule: no output of this pipeline is ever described as a 'confirmed' exocomet."
+  type: governance_rule
+  status: OPERATIONAL
+  evidence:
+    - source_type: doc
+      source: docs/specification/00_document_control.md
+    - source_type: doc
+      source: docs/NEXT_STEPS.md
+  commit: 01c2051
+  measured_at: "2026-09-16"
+  revalidation_required: false
+  note: "editorial/process rule, not an empirical claim — status reflects that it is actively enforced, not that it has been 'tested'"

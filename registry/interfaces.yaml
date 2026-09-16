@@ -1,0 +1,41 @@
+# Machine-readable mirror of 57_api_interface_contracts.md.
+# Source: src/exocomet/core/interfaces.py.
+# Generated: 2026-09-16, against commit 01c2051.
+
+- name: LightCurveSource
+  module: src/exocomet/core/interfaces.py
+  kind: "Protocol, runtime_checkable"
+  methods:
+    - "fetch(self, target_id: str, mission: str) -> LightCurveData"
+  implementations:
+    - src/exocomet/io/download.py::MastLightCurveSource
+  status: IMPLEMENTED
+
+- name: Detrender
+  module: src/exocomet/core/interfaces.py
+  kind: "Protocol, runtime_checkable"
+  methods:
+    - "detrend(self, lc: LightCurveData) -> LightCurveData"
+  implementations:
+    - src/exocomet/detrend/detrend.py::SavGolDetrender
+    - src/exocomet/detrend/detrend.py::SplineDetrender
+  status: IMPLEMENTED
+
+- name: Vetter
+  module: src/exocomet/core/interfaces.py
+  kind: "Protocol, runtime_checkable"
+  methods:
+    - "vet(self, event: DipEvent, lc: LightCurveData) -> VettingResult"
+  implementations: []
+  status: "DEFINED, NOT IMPLEMENTED"
+
+- name: Detector
+  module: src/exocomet/core/interfaces.py
+  kind: "abc.ABC (not a Protocol)"
+  methods:
+    - "detect(self, lc: LightCurveData) -> list[DipEvent]  # abstract"
+    - "score(self, event: DipEvent, lc: LightCurveData) -> EventScore  # abstract"
+    - "run(self, lc: LightCurveData) -> list[CandidateRecord]  # concrete, composes detect+score"
+  implementations:
+    - src/exocomet/detect/comet_detector.py::AsymmetricDipDetector
+  status: "IMPLEMENTED (one real subclass; extensibility design intent unexercised by a second implementation)"

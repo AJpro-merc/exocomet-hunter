@@ -1,0 +1,63 @@
+# Machine-readable mirror of 48_experiment_registry.md.
+# Generated: 2026-09-16, against commit 01c2051.
+
+- id: EXP-001
+  date: "2026-09-14/15"
+  description: "Six-event KIC 3542116 validation (re-detect all six Rappaport et al. 2018 epochs)."
+  commit: UNKNOWN
+  dataset: "Real MAST Kepler long-cadence photometry, KIC 3542116"
+  outputs: "README.md recovery table; scripts/run_validation.py console output"
+  status: VALIDATED
+
+- id: EXP-002
+  date: "2026-09-15"
+  description: >
+    Measured the ~77-78% depth ratio in KIC 3542116; tested baseline contamination (H1),
+    fitted-vs-observed depth (H2), detrending absorption (H3) hypotheses.
+  commit: UNKNOWN
+  dataset: "Real cached KIC 3542116 FITS (offline, data/raw/mastDownload/)"
+  outputs: docs/research_log/006-depth-offset-investigation.md
+  status: "VALIDATED as measurement; underlying question OPEN"
+
+- id: EXP-003
+  date: "2026-09-15"
+  description: >
+    Mirror-image adversarial test: synthetic trailing-tail vs leading-tail events,
+    same depth/noise/duration, to test whether delta-BIC or tau/sigma carries direction.
+  commit: UNKNOWN
+  dataset: "Fully synthetic"
+  outputs: "docs/research_log/007-delta-bic-is-direction-blind.md, results/figures/tail_direction.png"
+  status: VALIDATED
+
+- id: EXP-004
+  date: "2026-09-14"
+  description: >
+    Cross-cadence injection-recovery check: same injected comet recovered at matching
+    epoch/tau-sigma from 120s and 1800s cadence versions of the same span.
+  commit: UNKNOWN
+  dataset: Synthetic
+  outputs: tests/unit/test_cross_cadence.py
+  status: "TESTED, VALIDATED (permanent regression test)"
+
+- id: EXP-005
+  date: "2026-09-15/16"
+  description: >
+    Real ingestion pipeline end-to-end proof on GitHub Actions, including a confirmed
+    push to the separate data repository.
+  commit: "afa4bb2 (initial), 01c2051 (current HEAD)"
+  dataset: "Real MAST data, KIC 1161345 plus the 23 Kepler + 10 TESS seed targets"
+  outputs: "AJpro-merc/exocomet-hunter-data (ledger.jsonl: 33 lines, 25 success / 8 failed, re-verified 2026-09-16)"
+  status: >
+    VALIDATED for two confirmed successful runs (2026-09-15); NOT VALIDATED for
+    continuous operation -- two most recent scheduled runs (2026-09-16) both failed
+    on a bug fixed only in the uncommitted working tree (see errors.yaml ERR-006).
+
+- id: EXP-006
+  date: "2026-09-15/16"
+  description: >
+    KIC 1161345 anomalous flag-rate observation: 43 flagged out of ~260 detected
+    events across two independent real MAST fetches.
+  commit: UNKNOWN
+  dataset: "Real Kepler long-cadence photometry, KIC 1161345"
+  outputs: "docs/specification/76_appendices.md (sample candidate record)"
+  status: "OPEN finding, not yet resolved via scripts/vet_host_list.py"

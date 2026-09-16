@@ -1,0 +1,220 @@
+# Machine-readable mirror of 46_parameter_provenance.md.
+# Source: config/thresholds.yaml, src/exocomet/core/config.py.
+# Generated: 2026-09-16, against commit 01c2051.
+
+- name: detrend.window_days
+  value: 8.1871
+  unit: days
+  config_location: config/thresholds.yaml:detrend.window_days
+  code_location: src/exocomet/core/config.py::DetrendConfig.window_days
+  valid_range: "must be >> longest expected dip duration"
+  origin: literature-derived + engineering-choice
+
+- name: detrend.polyorder
+  value: 2
+  unit: null
+  config_location: config/thresholds.yaml:detrend.polyorder
+  code_location: src/exocomet/core/config.py::DetrendConfig.polyorder
+  valid_range: UNKNOWN
+  origin: UNKNOWN
+
+- name: detrend.upper_sigma_clip
+  value: 5.0
+  unit: robust sigma
+  config_location: config/thresholds.yaml:detrend.upper_sigma_clip
+  code_location: src/exocomet/core/config.py::DetrendConfig.upper_sigma_clip
+  valid_range: UNKNOWN
+  origin: engineering-choice
+
+- name: detrend.spline_knot_spacing_days
+  value: 1.5
+  unit: days
+  config_location: config/thresholds.yaml:detrend.spline_knot_spacing_days
+  code_location: src/exocomet/core/config.py::DetrendConfig.spline_knot_spacing_days
+  valid_range: UNKNOWN
+  origin: UNKNOWN
+
+- name: baseline.median_window_days
+  value: 2.0621
+  unit: days
+  config_location: config/thresholds.yaml:baseline.median_window_days
+  code_location: src/exocomet/core/config.py::BaselineConfig.median_window_days
+  valid_range: UNKNOWN
+  origin: engineering-choice (continuity with prior cadence-count value)
+
+- name: baseline.noise_window_days
+  value: 2.0621
+  unit: days
+  config_location: config/thresholds.yaml:baseline.noise_window_days
+  code_location: src/exocomet/core/config.py::BaselineConfig.noise_window_days
+  valid_range: UNKNOWN
+  origin: engineering-choice (continuity)
+
+- name: candidates.sigma_threshold
+  value: 4.0
+  unit: robust sigma
+  config_location: config/thresholds.yaml:candidates.sigma_threshold
+  code_location: src/exocomet/core/config.py::CandidateConfig.sigma_threshold
+  valid_range: UNKNOWN
+  origin: UNKNOWN
+
+- name: candidates.min_consecutive
+  value: 3
+  unit: cadences
+  config_location: config/thresholds.yaml:candidates.min_consecutive
+  code_location: src/exocomet/core/config.py::CandidateConfig.min_consecutive
+  valid_range: UNKNOWN
+  origin: engineering-choice
+
+- name: candidates.max_gap_cadences
+  value: 2
+  unit: cadences
+  config_location: config/thresholds.yaml:candidates.max_gap_cadences
+  code_location: src/exocomet/core/config.py::CandidateConfig.max_gap_cadences
+  valid_range: UNKNOWN
+  origin: engineering-choice
+
+- name: candidates.max_window_days
+  value: 3.0
+  unit: days
+  config_location: config/thresholds.yaml:candidates.max_window_days
+  code_location: src/exocomet/core/config.py::CandidateConfig.max_window_days
+  valid_range: UNKNOWN
+  origin: engineering-choice
+
+- name: candidates.recovery_sigma
+  value: 1.0
+  unit: robust sigma
+  config_location: config/thresholds.yaml:candidates.recovery_sigma
+  code_location: src/exocomet/core/config.py::CandidateConfig.recovery_sigma
+  valid_range: UNKNOWN
+  origin: UNKNOWN
+
+- name: candidates.edge_margin_days
+  value: 1.0208
+  unit: days
+  config_location: config/thresholds.yaml:candidates.edge_margin_days
+  code_location: src/exocomet/core/config.py::CandidateConfig.edge_margin_days
+  valid_range: UNKNOWN
+  origin: engineering-choice (continuity)
+
+- name: asymmetry.half_depth_fraction
+  value: 0.5
+  unit: fraction of depth
+  config_location: config/thresholds.yaml:asymmetry.half_depth_fraction
+  code_location: src/exocomet/core/config.py::AsymmetryConfig.half_depth_fraction
+  valid_range: "[0, 1]"
+  origin: convention
+
+- name: asymmetry.min_points_per_side
+  value: 3
+  unit: cadences
+  config_location: config/thresholds.yaml:asymmetry.min_points_per_side
+  code_location: src/exocomet/core/config.py::AsymmetryConfig.min_points_per_side
+  valid_range: UNKNOWN
+  origin: engineering-choice
+
+- name: asymmetry.search_padding_factor
+  value: 2.0
+  unit: "multiple of window duration"
+  config_location: "NOT PRESENT in config/thresholds.yaml (dataclass default only)"
+  code_location: src/exocomet/core/config.py::AsymmetryConfig.search_padding_factor
+  valid_range: UNKNOWN
+  origin: UNKNOWN
+  note: "YAML override cannot currently reach this field -- a real doc/code gap, see 46_parameter_provenance.md 46.4"
+
+- name: scoring.bootstrap_draws
+  value: 1000
+  unit: draws
+  config_location: config/thresholds.yaml:scoring.bootstrap_draws
+  code_location: src/exocomet/core/config.py::ScoringConfig.bootstrap_draws
+  valid_range: UNKNOWN
+  origin: engineering-choice
+
+- name: scoring.significance_threshold
+  value: 3.0
+  unit: sigma
+  config_location: config/thresholds.yaml:scoring.significance_threshold
+  code_location: src/exocomet/core/config.py::ScoringConfig.significance_threshold
+  valid_range: UNKNOWN
+  origin: "engineering-choice (historical: pre-A4 decision threshold, now reported only)"
+
+- name: scoring.require_sign_agreement
+  value: true
+  unit: boolean
+  config_location: config/thresholds.yaml:scoring.require_sign_agreement
+  code_location: src/exocomet/core/config.py::ScoringConfig.require_sign_agreement
+  valid_range: "{true, false}"
+  origin: convention
+
+- name: scoring.delta_bic_threshold
+  value: 10.0
+  unit: "delta-BIC units"
+  config_location: config/thresholds.yaml:scoring.delta_bic_threshold
+  code_location: src/exocomet/core/config.py::ScoringConfig.delta_bic_threshold
+  valid_range: UNKNOWN
+  origin: "literature-derived (Kass & Raftery 1995 'strong evidence' convention)"
+
+- name: scoring.tau_over_sigma_threshold
+  value: 1.0
+  unit: ratio
+  config_location: config/thresholds.yaml:scoring.tau_over_sigma_threshold
+  code_location: src/exocomet/core/config.py::ScoringConfig.tau_over_sigma_threshold
+  valid_range: UNKNOWN
+  origin: physical/definitional
+
+- name: scoring.periodicity_min_period_days
+  value: 0.5
+  unit: days
+  config_location: config/thresholds.yaml:scoring.periodicity_min_period_days
+  code_location: src/exocomet/core/config.py::ScoringConfig.periodicity_min_period_days
+  valid_range: UNKNOWN
+  origin: engineering-choice
+
+- name: scoring.periodicity_max_period_days
+  value: 50.0
+  unit: days
+  config_location: config/thresholds.yaml:scoring.periodicity_max_period_days
+  code_location: src/exocomet/core/config.py::ScoringConfig.periodicity_max_period_days
+  valid_range: UNKNOWN
+  origin: engineering-choice
+
+- name: scoring.periodicity_fap_threshold
+  value: 0.01
+  unit: "false-alarm probability"
+  config_location: config/thresholds.yaml:scoring.periodicity_fap_threshold
+  code_location: src/exocomet/core/config.py::ScoringConfig.periodicity_fap_threshold
+  valid_range: "[0, 1]"
+  origin: convention
+
+- name: search.target_batch_size
+  value: 40
+  unit: stars
+  config_location: config/thresholds.yaml:search.target_batch_size
+  code_location: src/exocomet/core/config.py::SearchConfig.target_batch_size
+  valid_range: UNKNOWN
+  origin: UNKNOWN
+
+- name: search.shortlist_size
+  value: 20
+  unit: candidates
+  config_location: config/thresholds.yaml:search.shortlist_size
+  code_location: src/exocomet/core/config.py::SearchConfig.shortlist_size
+  valid_range: UNKNOWN
+  origin: UNKNOWN
+
+- name: runtime.rng_seed
+  value: 42
+  unit: null
+  config_location: config/thresholds.yaml:runtime.rng_seed
+  code_location: src/exocomet/core/config.py::RuntimeConfig.rng_seed
+  valid_range: "any integer"
+  origin: engineering-choice
+
+- name: runtime.max_workers
+  value: null
+  unit: "worker processes"
+  config_location: config/thresholds.yaml:runtime.max_workers
+  code_location: src/exocomet/core/config.py::RuntimeConfig.max_workers
+  valid_range: "null -> os.cpu_count() - 1, or positive integer"
+  origin: engineering-choice
