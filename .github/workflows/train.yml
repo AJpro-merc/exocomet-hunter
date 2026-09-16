@@ -1,8 +1,8 @@
 # Scheduled classifier training pipeline (Next Steps C1/C2).
 #
 # Claude Cloud routines cannot reach mast.stsci.edu (a 403 from the sandbox's
-# own egress proxy, confirmed 2026-09-14 -- see docs/NEXT_STEPS.md
-# and Findings Log). GitHub Actions runners have normal internet access and
+# own egress proxy, confirmed 2026-09-14 -- see docs/NEXT_STEPS.md).
+# GitHub Actions runners have normal internet access and
 # proved they can reach MAST for real. So generation and training both run
 # here; a separate Claude Cloud routine reads and reports on the results
 # (docs/cloud-routine-prompt-training.md) -- it just cannot do the download

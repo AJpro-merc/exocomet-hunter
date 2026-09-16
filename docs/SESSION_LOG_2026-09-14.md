@@ -272,9 +272,9 @@ to paste in, not yet created in the Claude app.
 ## 13. Git history cleanup (explicit user request, `YRAG`-confirmed)
 
 Late in the session the user asked to remove all Claude attribution from git history
-entirely and instead credit it once in each repo's README. Per the vault's own rule
-(`CLAUDE.md`: destructive/irreversible actions need the explicit `YRAG` confirmation
-phrase, not just "do it"), this was surfaced and confirmed before acting.
+entirely and instead credit it once in each repo's README. Per the project's own
+standing rule (destructive/irreversible actions need explicit confirmation, not just
+"do it"), this was surfaced and confirmed before acting.
 
 - **`exocomet-hunter-data`**: already a single commit with no Claude mention. Amended
   in place to add the README line (""),

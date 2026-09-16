@@ -1,7 +1,6 @@
 # Session Log — 2026-09-13
 
 Everything that happened in the first build session, in order, with the numbers.
-Identical copy kept in `docs/SESSION_LOG_2026-09-13.md`.
 
 ---
 
@@ -32,7 +31,7 @@ checks NASA's archive for new data every day by itself.
 
 ## 2. Repository setup
 
-- Location: `exocomet-hunter`
+- Location: local clone of `exocomet-hunter`
 - Python **3.12.13** venv at `.venv/` (system python is 3.9, too old).
 - `pip install -e ".[dev]"` — succeeded; took several minutes. An earlier install attempt
   had been killed because it looked hung; it was just slow. `import lightkurve` alone takes
@@ -191,6 +190,4 @@ checks NASA's archive for new data every day by itself.
 
 - `README.md`, `docs/research_log/003-half-depth-contour-sign-error.md`,
   `docs/cloud-routine-prompt.md`, this log, `docs/NEXT_STEPS.md`.
-- BRAIN: `docs/` — Index, The Science, Pipeline Architecture, Findings Log,
-  Data Sources and Literature, Session Log, Next Steps.
 - Figures: `results/figures/overview.png`, `results/figures/published_dips.png`.

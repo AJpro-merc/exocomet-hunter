@@ -2,10 +2,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # Resumable hourly ingestion (scripts/ingest.py). Generation only -- no
-# training here. Training happens manually, watched, when Atharva reviews the
-# accumulated data (see docs/Session Log 2026-09-15 for why: an
-# unwatched weekly cron retraining on unreviewed predictions was the wrong
-# design, corrected this session).
+# training here. Training happens manually, watched, when the project author
+# reviews the accumulated data: an unwatched weekly cron retraining on
+# unreviewed predictions was the wrong design, corrected after being tried.
 #
 # Every hour: fetch one target, save the extract (time/flux/flux_err, the
 # permanent detector-independent layer), delete the raw FITS, run the

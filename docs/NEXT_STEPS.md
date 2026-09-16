@@ -1,8 +1,7 @@
 # Next Steps
 
 Every known task, in order, with enough detail to start without re-deriving anything.
-Identical copy kept in `docs/NEXT_STEPS.md`. Last updated 2026-09-15 (early
-morning — session ran past midnight).
+Identical copy kept in `exocomet-hunter/docs/NEXT_STEPS.md`. Last updated 2026-09-16.
 
 Status key: 🔴 blocks trustworthy results · 🟠 important · 🟢 later / polish
 
@@ -10,54 +9,50 @@ Status key: 🔴 blocks trustworthy results · 🟠 important · 🟢 later / po
 
 ## Plain-language summary
 
-The detector now works correctly on **both** Kepler and TESS data — A1 and A2 are both
-fixed and verified against real data. A4 is still open. C1 (the classifier's labelled
-training data) and C2 (a real training script) are both built; the recurring generation
-and training pipeline runs on GitHub Actions, not Claude Cloud routines (those cannot
-reach NASA's archive at all — a platform limit, confirmed and documented). One real step
-(the trained model's live backtest against KIC 3542116) is implemented but not yet
-verified end-to-end — see "FIRST THING NEXT SESSION" below. Full narrative:
-[[Session Log 2026-09-14]].
+The detector works correctly on **both** Kepler and TESS data (A1/A2), and **A4 is now
+fixed too** — the flag rule is ΔBIC + τ/σ, both config-driven, and fixing it surfaced a
+real finding (ΔBIC alone is direction-blind; only τ/σ tells a real comet from a physically
+backwards one — see research log 007). The old MAST hang from 09-14 is root-caused and
+fixed for real: retries were hitting a poisoned local cache with no cleanup between
+attempts, so a "retry" never actually retried. A full resumable hourly ingestion pipeline
+(`scripts/ingest.py` + `ingest.yml`) was built, tested against real MAST data twice (two
+more real bugs found and fixed live), committed, pushed, and proven end-to-end on GitHub's
+own infrastructure — every step succeeds except the final push, which needs
+`DATA_REPO_TOKEN`. Relicensed to BSD-3-Clause + CC-BY-4.0 with headers on every file. Full
+narrative: [[Session Log 2026-09-15]].
 
 ---
 
-## ⚠️ FIRST THING NEXT SESSION (2026-09-15)
+## ⚠️ FIRST THING NEXT SESSION (2026-09-16)
 
-0. ~~Push the squashed `exocomet-hunter` git history~~ — **done**, later the same
-   2026-09-14 session, once the user approved the harness's permission prompt. Verify:
-   `origin/main` is at `044ad99` (or later). Both repos' history is clean, single-commit
-   origin, no Claude attribution anywhere except one README credit line.
-1. **Verify `scripts/train_classifier.py`'s real-data backtest actually completes.**
-   It hung with zero CPU progress for 9+ minutes fetching KIC 3542116 near the end of
-   the 2026-09-14 session and had to be killed; a direct retry of the same
-   `fetch_light_curve` call also hung and was interrupted before diagnosis finished.
-   Every other MAST fetch that session succeeded, including an earlier one for this
-   same star — so this is most likely transient, but **unconfirmed**. Run it for real,
-   watched, before trusting this script in production:
-   ```bash
-   cd "exocomet-hunter" && source .venv/bin/activate
-   time python3 -c "
-   from exocomet.io.download import fetch_light_curve
-   lc = fetch_light_curve('KIC 3542116', mission='Kepler', discard_after_read=True)
-   print('ok', lc.n_points)
-   "
-   ```
-   If it hangs again, that's a real bug (network timeout missing somewhere in
-   `io/download.py`/`lightkurve`) worth root-causing, not retrying blind.
-2. **Set up `DATA_REPO_TOKEN`** (the user's own step, not mine to do): a fine-grained
+1. **Set up `DATA_REPO_TOKEN`** (the user's own step, not mine to do): a fine-grained
    GitHub PAT scoped to `AJpro-merc/exocomet-hunter-data` only, `Contents: Read and
    write`, added as a repo secret on `AJpro-merc/exocomet-hunter` (Settings → Secrets
-   and variables → Actions). Until this exists, `train.yml`'s push-to-data-repo steps
-   fail loudly (expected, not a bug).
-3. Once both of those are done, **trigger `train.yml` for real** (`gh workflow run
-   train.yml`) and watch a complete run — generation, test, commit to the data repo,
-   and (if `run_train` weekly-equivalent input is set) a real training run — end to end
-   for the first time.
-4. **Create Cloud routine 3** (`Exocomet training summary`, reporting-only — text is
+   and variables → Actions). Confirmed 2026-09-15 via a live run's actual error
+   (`Invalid username or token`) that this genuinely does not exist yet — it is the
+   **only** thing standing between "proven" and "actually running unattended."
+2. Once it exists, **`gh workflow enable ingest.yml`** and watch one real hourly-shaped
+   run complete the full cycle including the push, for the first time.
+3. **`scripts/build_target_list.py`'s control-group matching is broken** — it queries
+   VizieR/TIC for real and returns disc-star matches, but the matched-control step
+   returns zero matches, so it produces no output files and isn't wired into
+   `ingest.py`'s target sources yet. `ingest.py` currently runs against the 33
+   hardcoded targets (23 Kepler + 10 TESS) only. Fix the matching logic, verify it
+   produces `config/target_list_{kepler,tess}.txt`, then wire it into `get_target_list()`
+   in `scripts/ingest.py`.
+4. **The H2 model-fit instability found during the B1 depth investigation** — the
+   comet-model fit is wildly unstable on shallow events (one dip fit at 3.47× its
+   published depth in `docs/research_log/006-depth-offset-investigation.md`). Worth its
+   own investigation, independent of the depth question it was found inside.
+5. **Fix `git push`'s account mismatch properly** — a persistent local credential
+   config, not a one-off token workaround, so this doesn't need rediscovering next
+   session (see Session Log 2026-09-15 for the immediate context this came up in).
+6. **Create Cloud routine 3** (`Exocomet training summary`, reporting-only — text is
    ready in `docs/cloud-routine-prompt-training.md`). Routines 1/2 are dead; don't
    recreate them.
-5. Copyright headers across public-facing files — Atharva asked for this, explicitly
-   deferred to a later session (not started).
+7. Documentation booklet Atharva asked for (09-14) — deferred until the system settled
+   enough to document accurately; it's settled substantially more as of 09-15, worth
+   reconsidering.
 
 ---
 
@@ -126,56 +121,61 @@ verified end-to-end — see "FIRST THING NEXT SESSION" below. Full narrative:
   (b) change the workflow to `--dry-run` only; (c) accept junk runs and clean up later.
   Recommended: (a).
 
-### A4. The `flagged` decision still uses the statistic we proved unreliable 🔴
-- **Problem:** `detect/scoring.py` line ~172 sets
-  `flagged = significance >= 3.0 and signs_agree`, where significance is `|a_dur| / σ(a_dur)`.
-  Research log 003 showed `a_dur` measured at half depth can have the wrong sign. The README
-  says ranking is by ΔBIC, but the code does not do that yet.
-- **Also:** the rule flags strong asymmetry in *either* direction. A reversed dip (slow in,
-  fast out) is currently flagged, and `tests/unit/test_scoring.py` expects that.
-- **Fix (interim, before the classifier exists):**
-  `flagged = delta_bic > 10 and tau_over_sigma > 1` (config values, not hardcoded).
-  Keep `a_dur` significance as an output column only. Update the reversed-asymmetry test
-  to expect *not* flagged, and add a test that the six KIC 3542116 dips are flagged.
+### A4. The `flagged` decision still uses the statistic we proved unreliable ✅ done 2026-09-15
+- **Fixed:** `flagged = delta_bic > cfg.delta_bic_threshold and tau_over_sigma > cfg.tau_over_sigma_threshold`,
+  both config-driven (`ScoringConfig`, `config/thresholds.yaml`), not hardcoded. `a_dur`
+  significance kept as a reported column only, no longer gates the decision. The reversed-
+  asymmetry test now asserts *not flagged* (inverted from before).
+- **Real finding while verifying the fix**: a synthetic mirror-image test
+  (`viz.plot_tail_direction`) showed ΔBIC alone scores the *reversed* (physically backwards)
+  event **higher** than the real comet (201 vs 151) — ΔBIC only measures "not symmetric,"
+  never direction. Only τ/σ encodes direction (4.15 vs 0.23). **The two-condition rule is
+  load-bearing, not redundant** — dropping τ/σ rebuilds the exact false-positive generator
+  this fix removed. Full writeup: `docs/research_log/007-delta-bic-is-direction-blind.md`.
 
 ---
 
 ## PART B — Known bugs and loose ends 🟠
 
-### B1. Depths come out at ~78% of published
+### B1. Depths come out at ~78% of published ✅ investigated 2026-09-15, still 🟠 open
 - All six: 442/491, 461/524, 412/679, 940/1200, 1094/1500, 1445/1900.
-- Hypotheses to test, one at a time:
-  1. Baseline for depth is the rolling median over the event window, which is pulled
-     down by the dip → measure against out-of-event median instead.
-  2. Paper's depth is from a fitted model, ours is the observed minimum → compare fitted
-     `ModelComparison.comet.params["depth"]` against published.
-  3. Savitzky-Golay detrending absorbs part of the dip → compare depth on raw normalised flux.
-- Record outcome in `docs/research_log/`.
+- All three hypotheses tested for real (`scripts/measure_depth_offset.py`, offline against
+  cached FITS): **detrending (H3) ruled out** — statistically identical to current
+  (0.779x vs 0.772x). **Baseline contamination (H1) real but partial** — closes about a
+  third of the gap (0.772x → 0.852x). Combined H1+H3 reaches 0.879x, still 12 points
+  short, and the real-data shortfall is *larger* than the synthetic check predicted —
+  **~10-15% remains genuinely unexplained**. Full writeup with tables:
+  `docs/research_log/006-depth-offset-investigation.md`.
+- **Surfaced a separate likely bug**: the fitted-depth hypothesis (H2) test found the
+  comet-model fit is wildly unstable on shallow events — one dip fit at 3.47× its
+  published depth. Worth its own investigation (see FIRST THING NEXT SESSION #4).
+- Next: test quarter-to-quarter stitching offsets as a fourth hypothesis (leading
+  suspect for the remaining gap, not yet tested).
 
 ### B2. Unexplained event at BKJD 1064.245 (531 ppm) in KIC 3542116
 - Check: is it near a quarter boundary or data gap? Does it appear in other stars at the
   same time (spacecraft artefact)? What does its plot look like? τ/σ and ΔBIC?
 - Do **not** call it a discovery.
 
-### B3. `exocomet` command is declared but does not exist
-- `pyproject.toml` has `exocomet = "exocomet.cli:main"`, but `src/exocomet/cli.py` was never
-  written. Installing the package creates a command that crashes. Either write the CLI (C3)
-  or remove the entry now.
+### B3. `exocomet` command is declared but does not exist ✅ done 2026-09-15
+- `src/exocomet/cli.py` written: `exocomet run/validate/inject`, all network imports lazy
+  so `--help` works with zero network. Reuses existing pipeline functions rather than
+  duplicating logic.
 
-### B4. Wrong GitHub URLs in `pyproject.toml`
-- Lines 63–66 point to `github.com/atharvajoshi/exocomet-hunter`. Should be
-  `github.com/AJpro-merc/exocomet-hunter`. Docs URL should be
-  `https://ajpro-merc.github.io/exocomet-hunter`.
+### B4. Wrong GitHub URLs in `pyproject.toml` ✅ done 2026-09-15
+- Fixed to `AJpro-merc/exocomet-hunter` and `https://ajpro-merc.github.io/exocomet-hunter`.
 
 ### B5. Second validation star has no epoch
 - `config/validation_targets.yaml` → `KIC 11084727` has `dips: []`. Read the epoch from
   Rappaport et al. 2018 (arXiv:1708.06069) and add it.
 
-### B6. Validation is not automated
-- The six epochs are in the config, but nothing reads them. Write
-  `scripts/run_validation.py` that loads `validation_targets.yaml`, runs the detector,
-  matches within `match_tolerance_days`, prints pass/fail per dip, exits non-zero on a miss.
-- Add an integration test `tests/integration/test_validation.py` marked `@pytest.mark.network`.
+### B6. Validation is not automated ✅ done 2026-09-15
+- `scripts/run_validation.py` loads `validation_targets.yaml`, matches detected epochs
+  within `match_tolerance_days`, prints pass/fail per dip, exits non-zero on a miss.
+  Has an `--offline` synthetic mode so the matching logic is provable without hitting
+  MAST — depends only on epoch recovery, not the `flagged` boolean (stayed decoupled
+  from the concurrent A4 rewrite by design).
+- `tests/integration/test_validation.py` added, marked `@pytest.mark.network`.
 
 ### B7. Missing tests
 - No test file for `detrend/detrend.py`, `calibration/injection.py`,
@@ -514,7 +514,7 @@ candidates are not confirmations. Independent agreement is evidence the existing
 ## Reference: commands that are easy to forget
 
 ```bash
-cd "exocomet-hunter"
+cd exocomet-hunter
 source .venv/bin/activate
 
 pytest tests/unit -q                     # 48 tests, ~2 s
