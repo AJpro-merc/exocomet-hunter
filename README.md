@@ -133,7 +133,3 @@ credentials required.
 Code (`src/`, `scripts/`, `tests/`) is licensed under [BSD-3-Clause](LICENSE).
 Documentation and paper materials (`docs/`, `paper/`) are licensed under
 [CC-BY-4.0](LICENSE-docs).
-
----
-
-
